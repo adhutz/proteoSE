@@ -2,3 +2,16 @@
 ^\.Rproj\.user$
 ^doc$
 ^Meta$
+^data-raw$
+^\.claude$
+^check_out\.txt$
+^HANDOVER\.md$
+^AUDIT\.md$
+^future\.md$
+^CHANGES_phase0-1\.md$
+^CLAUDE\.md$
+^LICENSE\.md$
+^\.github$
+^experiment_design\.csv$
+^experiment_design\.xlsx$
+^r_session_info$

@@ -131,7 +131,7 @@ The *clusterProfiler::gseGO()* function is used to perform GO-term enrichment an
 
 ```{r GO-term-enrichment}
 
-se_GO <- sev::se_GOE(se_diff_spec, col_names = "griesser_heat_vs_no_glom_heat_diff", OrgDb = "org.Hs.eg.db", pvalueCutoff = 0.5)
+se_GO <- sev::enrich_go_se(se_diff_spec, col_names = "griesser_heat_vs_no_glom_heat_diff", OrgDb = "org.Hs.eg.db", pvalueCutoff = 0.5)
 
 ```
 

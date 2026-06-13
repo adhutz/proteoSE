@@ -4,3 +4,10 @@
 .Ruserdata
 /doc/
 /Meta/
+
+# Artifacts written to the working directory by running examples/reports
+/experiment_design.csv
+/experiment_design.xlsx
+/r_session_info/
+/check_out.txt
+data-raw/test_run.log

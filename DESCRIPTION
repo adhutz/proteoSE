@@ -1,12 +1,101 @@
 Package: sev
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Title: The SummarizedExperiment Viewer for Proteomics Analysis
+Version: 0.1.0
+Authors@R:
+    person("Arvid", "Hutzfeldt", , "arvid.hutzfeldt@gmail.com",
+           role = c("aut", "cre"))
+Description: A utility toolkit for (phospho)proteomics data analysis organised
+    around the Bioconductor SummarizedExperiment class. It bundles convenience
+    functions for importing search-engine output (MaxQuant, Spectronaut,
+    FragPipe), missing-value imputation, differential-abundance testing,
+    GO-term and gene-set enrichment, kinase-substrate and signalome analysis
+    (PhosR), STRING network retrieval, and publication-ready plotting. It builds
+    on DEP2, iSEE/iSEEu, PhosR, limma and clusterProfiler.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
+URL: https://github.com/adhutz/sev
+BugReports: https://github.com/adhutz/sev/issues
+biocViews: Proteomics, MassSpectrometry, DifferentialExpression,
+    GeneSetEnrichment, Network, Visualization
+Depends:
+    R (>= 4.2)
+Imports:
+    AnnotationDbi,
+    assertthat,
+    BiocGenerics,
+    clusterProfiler,
+    cmapR,
+    cowplot,
+    DEP2,
+    DescTools,
+    digest,
+    DOSE,
+    dplyr,
+    fdrtool,
+    forcats,
+    gdata,
+    ggplot2,
+    ggpubr,
+    ggraph,
+    ggrepel,
+    GOSemSim,
+    grDevices,
+    httr2,
+    HybridMTest,
+    igraph,
+    IRanges,
+    iSEE,
+    iSEEu,
+    janitor,
+    KEGGREST,
+    limma,
+    magrittr,
+    methods,
+    MSnbase,
+    patchwork,
+    PhosR,
+    plyr,
+    purrr,
+    qvalue,
+    rbioapi,
+    RColorBrewer,
+    rlang,
+    S4Vectors,
+    scales,
+    SingleCellExperiment,
+    splitstackshape,
+    stats,
+    stringr,
+    SummarizedExperiment,
+    tibble,
+    tidyr,
+    tidyselect,
+    uniprotREST,
+    utils,
+    vroom,
+    waldo
+Suggests:
+    anticlust,
+    BiocManager,
+    clipr,
+    ComplexHeatmap,
+    doParallel,
+    DT,
+    knitr,
+    missForest,
+    openxlsx,
+    parallel,
+    renv,
+    rentrez,
+    rmarkdown,
+    rstudioapi,
+    shiny,
+    shinydashboard,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Remotes:
+    mildpiggy/DEP2,
+    csdaw/uniprotREST
