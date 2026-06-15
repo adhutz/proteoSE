@@ -1,4 +1,4 @@
 library(testthat)
-library(sev)
+library(sev2)
 
-test_check("sev")
+test_check("sev2")

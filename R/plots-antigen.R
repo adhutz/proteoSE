@@ -23,7 +23,7 @@
 #' @return A combined plot displaying individual and overlapping data points for the specified contrast.
 #' @details The function processes the `SummarizedExperiment` data to calculate the mean of control samples and the differences between test samples and control means. It generates individual plots for test samples and an overlap plot for the specified conditions.
 #' 
-#' If the mean for the control condition is not already present in the data, it is calculated using `sev::add_stats()`.
+#' If the mean for the control condition is not already present in the data, it is calculated using `sev2::add_stats()`.
 #'
 #' @examples
 #' \dontrun{
@@ -44,8 +44,8 @@ plot_antigen <- function(se, contrast, additional_sets = "none", scale = FALSE, 
   test_condition <- gsub("(.*)_vs_.*","\\1", contrast)
   
   if(!ctrl_mean %in% colnames(rowData(se))){
-    se <- sev::add_stats(se, type = "mean")
-    message(paste0("No mean for ctrl condition found. Mean for\"", ctrl_condition, "\" was calculated via sev::add_stats(). This value is not retained in the se object."))
+    se <- add_stats(se, type = "mean")
+    message(paste0("No mean for ctrl condition found. Mean for\"", ctrl_condition, "\" was calculated via sev2::add_stats(). This value is not retained in the se object."))
   }
   
   if(additional_sets == "all"){

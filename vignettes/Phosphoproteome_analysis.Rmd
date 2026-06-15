@@ -41,9 +41,9 @@ Phosphosite multiplicity refers to the number of phosphates attached to a single
 
 ```{r}
 library(dplyr)
-library(sev)
+library(sev2)
 
-se <- sev::phos_read_in_int(file = "../inst/extdata/example_2_Phospho (STY)Sites.txt", sep = "_r")
+se <- sev2::phos_read_in_int(file = "../inst/extdata/example_2_Phospho (STY)Sites.txt", sep = "_r")
 
 ```
 
@@ -139,7 +139,7 @@ By estimating missing values based on observed data patterns, imputation takes i
 In the context of imputing missing values in proteomics, drawing from a left-shifted Gaussian distribution is a common approach because it reflects the underlying assumption that missing values are likely to be lower than the observed values. 
 ```{r}
 # Impute with "perseus" method
-se_imp_perseus <- se_norm %>% sev::impute_DEP(fun = "man")
+se_imp_perseus <- se_norm %>% sev2::impute_DEP(fun = "man")
 
 p_imp <- DEP::plot_imputation(se_norm, se_imp_perseus)
 
@@ -195,8 +195,8 @@ p_occ
 
 
 # volcanos with labels
-v1 <- sev:::se_volcano(se_diff, contrast = "gfp_vs_g0", id_col = "name")
-v2 <- sev:::se_volcano(se_diff, contrast = "g2_vs_g0", id_col = "name")
+v1 <- sev2:::se_volcano(se_diff, contrast = "gfp_vs_g0", id_col = "name")
+v2 <- sev2:::se_volcano(se_diff, contrast = "g2_vs_g0", id_col = "name")
 
 v1
 v2
@@ -462,9 +462,9 @@ Phosphosite multiplicity refers to the number of phosphates attached to a single
 
 ```{r}
 library(dplyr)
-library(sev)
+library(sev2)
 
-se <- sev::phos_read_in_int(file = "../inst/extdata/example_2_Phospho (STY)Sites.txt", sep = "_r")
+se <- sev2::phos_read_in_int(file = "../inst/extdata/example_2_Phospho (STY)Sites.txt", sep = "_r")
 
 ```
 
@@ -560,7 +560,7 @@ By estimating missing values based on observed data patterns, imputation takes i
 In the context of imputing missing values in proteomics, drawing from a left-shifted Gaussian distribution is a common approach because it reflects the underlying assumption that missing values are likely to be lower than the observed values. 
 ```{r}
 # Impute with "perseus" method
-se_imp_perseus <- se_norm %>% sev::impute_DEP(fun = "man")
+se_imp_perseus <- se_norm %>% sev2::impute_DEP(fun = "man")
 
 p_imp <- DEP::plot_imputation(se_norm, se_imp_perseus)
 
@@ -616,8 +616,8 @@ p_occ
 
 
 # volcanos with labels
-v1 <- sev:::se_volcano(se_diff, contrast = "gfp_vs_g0", id_col = "name")
-v2 <- sev:::se_volcano(se_diff, contrast = "g2_vs_g0", id_col = "name")
+v1 <- sev2:::se_volcano(se_diff, contrast = "gfp_vs_g0", id_col = "name")
+v2 <- sev2:::se_volcano(se_diff, contrast = "g2_vs_g0", id_col = "name")
 
 v1
 v2

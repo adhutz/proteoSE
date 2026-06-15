@@ -44,7 +44,7 @@ This function creates patient-wise plots of protein intensity differences for a 
 \details{
 The function processes the \code{SummarizedExperiment} data to calculate the mean of control samples and the differences between test samples and control means. It generates individual plots for test samples and an overlap plot for the specified conditions.
 
-If the mean for the control condition is not already present in the data, it is calculated using \code{sev::add_stats()}.
+If the mean for the control condition is not already present in the data, it is calculated using \code{sev2::add_stats()}.
 }
 \examples{
 \dontrun{

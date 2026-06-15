@@ -232,7 +232,7 @@ aov_scale_phosR <- function(ppe, p_cut = 0.05, fc_cut = 0.5, assay = "normalised
   colnames(mat.std) <- ppe$ID
   
   ppe <- ppe[idx,]
-  ppe <- sev::add_assay(ppe, mat.std, "z_scored")
+  ppe <- add_assay(ppe, mat.std, "z_scored")
   
   return(ppe)
 }

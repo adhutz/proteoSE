@@ -1,4 +1,4 @@
-Package: sev
+Package: sev2
 Title: The SummarizedExperiment Viewer for Proteomics Analysis
 Version: 0.1.0
 Authors@R:
@@ -15,8 +15,8 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-URL: https://github.com/adhutz/sev
-BugReports: https://github.com/adhutz/sev/issues
+URL: https://github.com/adhutz/sev2
+BugReports: https://github.com/adhutz/sev2/issues
 biocViews: Proteomics, MassSpectrometry, DifferentialExpression,
     GeneSetEnrichment, Network, Visualization
 Depends:
