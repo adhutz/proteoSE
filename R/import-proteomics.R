@@ -662,3 +662,144 @@ fix_maxquant_pig_annotation <- function(proteingroups, peptides, fasta, mult_org
   }
 }
 
+#' Merge any PG-derived columns present in the peptide report but absent from
+#' the protein report into the protein SE's rowData (matched by protein_link_col),
+#' then strip protein-group-derived columns from the peptide data EXCEPT the
+#' link column itself, which is retained for addAssayLink.
+#'
+#' @param peptide_df Cleaned peptide report (after .read_clean_spectronaut +
+#'   .rename_quant_cols), still containing pg_* and run-wise PG metric columns.
+#' @param protein_se The protein-level SummarizedExperiment (already built).
+#' @param protein_link_col Column name shared by both reports identifying the
+#'   protein group, e.g. "protein_groups". Retained in peptide_df.
+#' @param peptide_id_col Peptide ID column, e.g. "pep_stripped_sequence".
+#'
+#' @return list(peptide_df = <peptide df with PG annotation columns removed,
+#'              protein_link_col retained>, protein_se = <protein SE, with any
+#'              new PG columns added to rowData>)
+.reconcile_pg_columns <- function(peptide_df, protein_se, protein_link_col, peptide_id_col) {
+  
+  ## Identify protein-group-derived columns in the peptide report (excluding
+  ## the link column, which is the join key and must be kept in peptide_df).
+  pg_cols <- grep("^pg_|^(genes|group_label|organisms|cscore|qvalue|pvalue)$",
+                  colnames(peptide_df), value = TRUE)
+  pg_cols <- union(pg_cols, protein_link_col)
+  pg_cols <- intersect(pg_cols, colnames(peptide_df))  # safety
+  
+  pg_cols_to_drop <- setdiff(pg_cols, protein_link_col)
+  
+  if (length(pg_cols) == 0) {
+    message("No PG-derived columns found in peptide report; nothing to reconcile.")
+    return(list(peptide_df = peptide_df, protein_se = protein_se))
+  }
+  
+  ## Reduce to one row per protein group (peptide-level PG columns should be
+  ## constant within a protein group; take first occurrence, warn if violated)
+  pg_table <- peptide_df[, c(protein_link_col, pg_cols_to_drop), drop = FALSE]
+  pg_table <- pg_table[!duplicated(pg_table[[protein_link_col]]), , drop = FALSE]
+  
+  if (length(pg_cols_to_drop) > 0) {
+    dup_check <- peptide_df %>%
+      dplyr::group_by(.data[[protein_link_col]]) %>%
+      dplyr::summarise(across(all_of(pg_cols_to_drop),
+                              ~dplyr::n_distinct(.x, na.rm = TRUE)), .groups = "drop")
+    inconsistent <- dup_check %>% dplyr::filter(if_any(-1, ~. > 1))
+    if (nrow(inconsistent) > 0) {
+      warning(nrow(inconsistent), " protein group(s) have inconsistent PG-column ",
+              "values across peptides; using the first occurrence per group. ",
+              "Affected columns: ", paste(pg_cols_to_drop, collapse = ", "))
+    }
+  }
+  
+  ## Which PG columns are genuinely missing from the protein SE's rowData?
+  rd_prot <- as.data.frame(SummarizedExperiment::rowData(protein_se))
+  missing_cols <- setdiff(pg_cols_to_drop, colnames(rd_prot))
+  
+  if (length(missing_cols) > 0) {
+    message("Adding PG column(s) missing from protein report into protein rowData: ",
+            paste(missing_cols, collapse = ", "))
+    
+    match_idx <- match(rd_prot[[protein_link_col]], pg_table[[protein_link_col]])
+    if (any(is.na(match_idx)))
+      warning(sum(is.na(match_idx)), " protein group(s) in the protein report ",
+              "have no match in the peptide report; new PG columns will be NA for these.")
+    
+    for (col in missing_cols) {
+      SummarizedExperiment::rowData(protein_se)[[col]] <- pg_table[[col]][match_idx]
+    }
+  } else {
+    message("No PG columns missing from protein report; nothing added.")
+  }
+  
+  ## Strip PG-derived annotation columns from peptide data, KEEPING the link column
+  peptide_df <- peptide_df[, setdiff(colnames(peptide_df), pg_cols_to_drop), drop = FALSE]
+  
+  list(peptide_df = peptide_df, protein_se = protein_se)
+}
+
+
+.build_peptide_se <- function(peptide_report, coldata, quant_col, peptide_id_col,
+                              protein_link_col, protein_se) {
+  df <- .read_clean_spectronaut(peptide_report)
+  df <- .rename_quant_cols(df, coldata)
+  
+  reconciled <- .reconcile_pg_columns(df, protein_se, protein_link_col, peptide_id_col)
+  df <- reconciled$peptide_df
+  protein_se <- reconciled$protein_se  # possibly updated rowData
+  
+  quant_cols <- grep(paste0(".*_", quant_col, "$"), colnames(df))
+  if (length(quant_cols) == 0)
+    stop("No peptide quant columns matched pattern '*_", quant_col, "'")
+  
+  rd <- df[, setdiff(colnames(df), colnames(df)[quant_cols]), drop = FALSE]
+  assay_mat <- as.matrix(df[, quant_cols, drop = FALSE])
+  rownames(assay_mat) <- df[[peptide_id_col]]
+  rownames(rd) <- df[[peptide_id_col]]
+  
+  se <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(quantification = assay_mat),
+    rowData = rd
+  )
+  
+  list(se = se, protein_se = protein_se)
+}
+
+
+spectronaut_to_qfeatures <- function(report = NULL,
+                                     peptide_report = NULL,
+                                     candidates = NULL,
+                                     contrasts = NULL,
+                                     conditionSetup = NULL,
+                                     quant_col = "log2quantity",
+                                     peptide_quant_col = "pep_quantity",
+                                     peptide_id_col = "pep_stripped_sequence",
+                                     protein_link_col = "protein_groups",
+                                     suggest_contrasts = TRUE,
+                                     collapse_conditions = FALSE,
+                                     conditions_tolower = FALSE) {
+  
+  coldata <- .build_coldata(conditionSetup, quant_col, conditions_tolower, collapse_conditions)
+  
+  se <- optimized_spectronaut_to_se(
+    candidates = candidates, report = report, contrasts = contrasts,
+    conditionSetup = conditionSetup, quant_col = quant_col,
+    suggest_contrasts = suggest_contrasts,
+    collapse_conditions = collapse_conditions, conditions_tolower = conditions_tolower
+  )
+  
+  pep_result <- .build_peptide_se(peptide_report, coldata, peptide_quant_col,
+                                  peptide_id_col, protein_link_col, protein_se = se)
+  pep_se <- pep_result$se
+  se     <- pep_result$protein_se   # enriched with any backfilled PG columns
+  
+  colData(pep_se) <- colData(se)[colnames(pep_se), , drop = FALSE]
+  
+  qf <- QFeatures::QFeatures(list(peptides = pep_se, proteins = se), colData = colData(se))
+  
+  qf <- QFeatures::addAssayLink(
+    qf, from = "peptides", to = "proteins",
+    varFrom = protein_link_col, varTo = "protein_ids"
+  )
+  
+  qf
+}
