@@ -1,0 +1,16 @@
+Run.Label	Label	Condition	Replicate	File.Name
+Ctrl_1.raw	Ctrl_1	Ctrl	1	Ctrl_1.raw
+Ctrl_2.raw	Ctrl_2	Ctrl	2	Ctrl_2.raw
+Ctrl_3.raw	Ctrl_3	Ctrl	3	Ctrl_3.raw
+Ctrl_4.raw	Ctrl_4	Ctrl	4	Ctrl_4.raw
+Ctrl_5.raw	Ctrl_5	Ctrl	5	Ctrl_5.raw
+TreatA_1.raw	TreatA_1	TreatA	1	TreatA_1.raw
+TreatA_2.raw	TreatA_2	TreatA	2	TreatA_2.raw
+TreatA_3.raw	TreatA_3	TreatA	3	TreatA_3.raw
+TreatA_4.raw	TreatA_4	TreatA	4	TreatA_4.raw
+TreatA_5.raw	TreatA_5	TreatA	5	TreatA_5.raw
+TreatB_1.raw	TreatB_1	TreatB	1	TreatB_1.raw
+TreatB_2.raw	TreatB_2	TreatB	2	TreatB_2.raw
+TreatB_3.raw	TreatB_3	TreatB	3	TreatB_3.raw
+TreatB_4.raw	TreatB_4	TreatB	4	TreatB_4.raw
+TreatB_5.raw	TreatB_5	TreatB	5	TreatB_5.raw
