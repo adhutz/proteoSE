@@ -13,8 +13,25 @@
 /check_out.txt
 data-raw/test_run.log
 
+# RStudio project file (machine-specific)
+*.Rproj
+
+# Data-prep and legacy scripts: kept locally, not part of the package
+/data-raw/
+
+# Working notes, superseded by docs/ and the vignette
+/AUDIT.md
+/HANDOVER.md
+/CHANGES_phase0-1.md
+/docs/worked_example.md
+/docs/superpowers/
+
+# Oversized example input, not needed to build or check
+/inst/extdata/example_2_Phospho_STY_Sites.txt
+
 # Private Claude Code notes
 CLAUDE.local.md
+/.claude/
 
 # Office lock files
 ~$*
