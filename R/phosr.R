@@ -1,6 +1,6 @@
 # PhosR signalome and PTM normalisation
 #
-# Part of the 'sev' package. Grouped by theme during the 2026 refactor
+# Part of the 'proteoSE' package. Grouped by theme during the 2026 refactor
 # (see AUDIT.md). Function bodies are preserved verbatim from the original
 # main.R / mlasse.txt; renames and cleanup follow in later phases.
 
@@ -93,7 +93,7 @@ plot_signalome_map <- function(signalome_res, kinase_signalome_color){
   p <- PhosR::plotSignalomeMap(signalome_res, kinase_signalome_color) +
     scale_size_continuous(range = c(1,5)) + 
     scale_y_continuous(labels = paste0("Cluster ", levels(as.factor(signalome_res$proteinModules))), breaks = 1:length(unique(signalome_res$proteinModules))) +
-    theme_sev()
+    theme_proteoSE()
   
   return(p)
 }
@@ -141,7 +141,7 @@ module_barplot <- function(mat, signalome_res){
                   xlab("Condition") +
                   ylab("Scaled intensity") +
                   labs(title = names(mod_list)[[z]]) +
-                  theme_sev())
+                  theme_proteoSE())
   
   return(res)
 }

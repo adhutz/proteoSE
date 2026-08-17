@@ -1,6 +1,6 @@
 # Deprecated function aliases
 #
-# Part of the 'sev' package. When a function is renamed or several near-duplicate
+# Part of the 'proteoSE' package. When a function is renamed or several near-duplicate
 # functions are consolidated, the old exported names are kept here as thin
 # wrappers that still work but emit .Deprecated(). Each wrapper forwards to the
 # canonical function with arguments chosen to reproduce the old behaviour, so
@@ -31,11 +31,11 @@
 #' @return For \code{se_volcano} and \code{lars_volcano}, a \code{ggplot} object
 #'   (the \code{plot_out} element). For \code{volcano}, the full list returned by
 #'   \code{\link{plot_volcano}}.
-#' @name sev-deprecated-volcano
+#' @name proteoSE-deprecated-volcano
 #' @keywords internal
 NULL
 
-#' @rdname sev-deprecated-volcano
+#' @rdname proteoSE-deprecated-volcano
 #' @export
 se_volcano <- function(se, contrast, id_col = "gene_names", target_names = c(""),
                        label_sign = TRUE, label_targets = TRUE, max.overlaps = Inf) {
@@ -55,7 +55,7 @@ se_volcano <- function(se, contrast, id_col = "gene_names", target_names = c("")
   )$plot_out
 }
 
-#' @rdname sev-deprecated-volcano
+#' @rdname proteoSE-deprecated-volcano
 #' @export
 lars_volcano <- function(se, contrast, id_col = "gene_names", target_names = c(""),
                          label_sign = TRUE, label_targets = TRUE, max.overlaps = 15,
@@ -77,7 +77,7 @@ lars_volcano <- function(se, contrast, id_col = "gene_names", target_names = c("
   )$plot_out
 }
 
-#' @rdname sev-deprecated-volcano
+#' @rdname proteoSE-deprecated-volcano
 #' @export
 volcano <- function(...) {
   .Deprecated("plot_volcano")
@@ -104,18 +104,18 @@ volcano <- function(...) {
 #' @param ... Passed on to \code{\link{read_ptm_to_ppe}}.
 #' @return A \code{\link[PhosR]{PhosphoExperiment}} object (see
 #'   \code{\link{read_ptm_to_ppe}}).
-#' @name sev-deprecated-ptm
+#' @name proteoSE-deprecated-ptm
 #' @keywords internal
 NULL
 
-#' @rdname sev-deprecated-ptm
+#' @rdname proteoSE-deprecated-ptm
 #' @export
 maxq_to_ppe <- function(...) {
   .Deprecated("read_ptm_to_ppe(source = \"maxquant\")")
   read_ptm_to_ppe(source = "maxquant", ...)
 }
 
-#' @rdname sev-deprecated-ptm
+#' @rdname proteoSE-deprecated-ptm
 #' @export
 ptm_to_ppe <- function(...) {
   .Deprecated("read_ptm_to_ppe(source = \"spectronaut\")")
@@ -268,7 +268,7 @@ sn_ptm_to_ppe <- function(file, sep = "_rep_", filt = c("reverse", "potential_co
   
   #rename some cols
   data <- wide_df %>%
-    dplyr::rename_with(~ sub("^quantity_", "intensity_", .x), starts_with("quantity_")) %>% #rename the "quantity" columns to "intensity" to match Arvid's SEV pacakge
+    dplyr::rename_with(~ sub("^quantity_", "intensity_", .x), starts_with("quantity_")) %>% #rename the "quantity" columns to "intensity" to match Arvid's proteoSE package
     dplyr::rename_with(~ sub("^group", "ptm_group_", .x), starts_with("group"))
   
   # Standardize column names
@@ -388,7 +388,7 @@ sn_ptm_to_ppe <- function(file, sep = "_rep_", filt = c("reverse", "potential_co
 #'   \item{\code{scatterPlot}}{use \code{\link{plot_scatter}}}
 #'   \item{\code{corr_plot}}{use \code{\link{plot_correlation}}}
 #'   \item{\code{clustered_heatmap}}{use \code{\link{plot_heatmap_clustered}}}
-#'   \item{\code{my_theme}}{use \code{\link{theme_sev}}}
+#'   \item{\code{my_theme}}{use \code{\link{theme_proteoSE}}}
 #'   \item{\code{colab_subset_df}}{use \code{\link{subset_results}}}
 #'   \item{\code{plot_indiviuals}}{use \code{\link{plot_individuals}}}
 #'   \item{\code{fix_maxq_pig}}{use \code{\link{fix_maxquant_pig_annotation}}}
@@ -397,58 +397,63 @@ sn_ptm_to_ppe <- function(file, sep = "_rep_", filt = c("reverse", "potential_co
 #'   \item{\code{advanced_test}}{use \code{\link{test_diff_limma}}}
 #'   \item{\code{long_test}}{use \code{\link{test_diff_long}}}
 #'   \item{\code{add_sign}}{use \code{\link{add_significance}}}
+#'   \item{\code{theme_sev}}{use \code{\link{theme_proteoSE}}}
 #' }
 #'
 #' @param ... Passed on to the renamed function.
 #' @return The value returned by the renamed function.
-#' @name sev-deprecated-renamed
+#' @name proteoSE-deprecated-renamed
 #' @keywords internal
 NULL
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 scatterPlot <- function(...) { .Deprecated("plot_scatter"); plot_scatter(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 corr_plot <- function(...) { .Deprecated("plot_correlation"); plot_correlation(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 clustered_heatmap <- function(...) { .Deprecated("plot_heatmap_clustered"); plot_heatmap_clustered(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
-my_theme <- function(...) { .Deprecated("theme_sev"); theme_sev(...) }
+my_theme <- function(...) { .Deprecated("theme_proteoSE"); theme_proteoSE(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 colab_subset_df <- function(...) { .Deprecated("subset_results"); subset_results(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 plot_indiviuals <- function(...) { .Deprecated("plot_individuals"); plot_individuals(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 fix_maxq_pig <- function(...) { .Deprecated("fix_maxquant_pig_annotation"); fix_maxquant_pig_annotation(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 se_GOE <- function(...) { .Deprecated("enrich_go_se"); enrich_go_se(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 to_long <- function(...) { .Deprecated("se_to_long"); se_to_long(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 advanced_test <- function(...) { .Deprecated("test_diff_limma"); test_diff_limma(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 long_test <- function(...) { .Deprecated("test_diff_long"); test_diff_long(...) }
 
-#' @rdname sev-deprecated-renamed
+#' @rdname proteoSE-deprecated-renamed
 #' @export
 add_sign <- function(...) { .Deprecated("add_significance"); add_significance(...) }
+
+#' @rdname proteoSE-deprecated-renamed
+#' @export
+theme_sev <- function(...) { .Deprecated("theme_proteoSE"); theme_proteoSE(...) }

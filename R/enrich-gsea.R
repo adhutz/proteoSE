@@ -1,6 +1,6 @@
 # GSEA / ssGSEA / KSEA preparation and GO-term reduction
 #
-# Part of the 'sev' package. Grouped by theme during the 2026 refactor
+# Part of the 'proteoSE' package. Grouped by theme during the 2026 refactor
 # (see AUDIT.md). Function bodies are preserved verbatim from the original
 # main.R / mlasse.txt; renames and cleanup follow in later phases.
 

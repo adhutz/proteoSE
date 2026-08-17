@@ -1,6 +1,6 @@
 # Antigen / patient-wise intensity plots
 #
-# Part of the 'sev' package. Grouped by theme during the 2026 refactor
+# Part of the 'proteoSE' package. Grouped by theme during the 2026 refactor
 # (see AUDIT.md). Function bodies are preserved verbatim from the original
 # main.R / mlasse.txt; renames and cleanup follow in later phases.
 
@@ -23,7 +23,7 @@
 #' @return A combined plot displaying individual and overlapping data points for the specified contrast.
 #' @details The function processes the `SummarizedExperiment` data to calculate the mean of control samples and the differences between test samples and control means. It generates individual plots for test samples and an overlap plot for the specified conditions.
 #' 
-#' If the mean for the control condition is not already present in the data, it is calculated using `sev2::add_stats()`.
+#' If the mean for the control condition is not already present in the data, it is calculated using `proteoSE::add_stats()`.
 #'
 #' @examples
 #' \dontrun{
@@ -45,7 +45,7 @@ plot_antigen <- function(se, contrast, additional_sets = "none", scale = FALSE, 
   
   if(!ctrl_mean %in% colnames(rowData(se))){
     se <- add_stats(se, type = "mean")
-    message(paste0("No mean for ctrl condition found. Mean for\"", ctrl_condition, "\" was calculated via sev2::add_stats(). This value is not retained in the se object."))
+    message(paste0("No mean for ctrl condition found. Mean for\"", ctrl_condition, "\" was calculated via proteoSE::add_stats(). This value is not retained in the se object."))
   }
   
   if(additional_sets == "all"){
@@ -192,7 +192,7 @@ plot_antigen_missing <- function(se, test_condition = "lcm_igan", ctrl_condition
       ggrepel::geom_text_repel(aes(label = name), min.segment.length = 0, max.overlaps = 10) +
       facet_grid(perc_low_ctrl_cut ~ perc_meas_igan_cut, scales = "free") +
       labs(fill = paste0("Percent missing in ", ctrl_condition), y = paste0("Mean(Intensity) in ", test_condition), x = "") +
-      theme_sev() +
+      theme_proteoSE() +
       theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
   } else{
     p_final <- df_final  %>% 
@@ -204,7 +204,7 @@ plot_antigen_missing <- function(se, test_condition = "lcm_igan", ctrl_condition
       ggrepel::geom_text_repel(aes(label = name), min.segment.length = 0, max.overlaps = 10) +
       facet_grid(perc_low_ctrl_cut ~ perc_meas_igan_cut, scales = "free") +
       labs(fill = paste0("Percent missing in ", ctrl_condition), y = paste0("Mean(Intensity) in ", test_condition), x = "") +
-      theme_sev() +
+      theme_proteoSE() +
       theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
   }
   return(p_final)
@@ -246,7 +246,7 @@ plot_individuals <- function(df, x, y, cut_x, cut_y, max.overlaps = 10, ctrl_con
     scale_color_manual(values = c("TRUE" = "darkorange", "FALSE" = "darkgrey")) +
     labs(color = "Above Thresholds", y = paste0(ifelse(scaled, "Scaled ", ""), "Intensity (", y, ")"), x = paste0(y, " - mean(", ctrl_condition, ")")) +
     geom_text_repel(data = filter(df, !!sym(x) >= cut_x & !!sym(y) >= cut_y), aes(label = name), max.overlaps = max.overlaps, min.segment.length = min.segment.length) +
-    theme_sev()
+    theme_proteoSE()
   return(p)
 }
 
@@ -308,7 +308,7 @@ plot_overlap  <- function(df = temp_df, test_condition = "MGN_ag_neg", ctrl_cond
       ggrepel::geom_text_repel(data = filter(df_sum, n == 1 | n == 2), aes(label = paste0(name, " | ", id)), min.segment.length = min.segment.length, max.overlaps = max.overlaps) +
       facet_wrap(.~n, scales = "free") +
       labs(y = paste0("Mean(", ifelse(scaled, "Scaled ", ""), "Intensity)"), x = "Mean(Diff)", title = paste0(test_condition, "vs", ctrl_condition)) +
-      theme_sev() 
+      theme_proteoSE() 
   } else {
     p_summary <- df_sum %>% ggplot(aes(x = diff, y = mean_intensity, fill = n))+
       geom_point(shape = 21, size = 3, alpha = 0.8)+
@@ -317,7 +317,7 @@ plot_overlap  <- function(df = temp_df, test_condition = "MGN_ag_neg", ctrl_cond
       ggrepel::geom_text_repel(data = filter(df_sum, n == 1 | n == 2), aes(label = paste0(name, " | ", id)), min.segment.length = min.segment.length, max.overlaps = max.overlaps) +
       facet_wrap(.~n, scales = "free") +
       labs(y = paste0("Mean(", ifelse(scaled, "Scaled ", ""), "Intensity)"), x = "Mean(Diff)", title = paste0(test_condition, "vs", ctrl_condition)) +
-      theme_sev()   
+      theme_proteoSE()   
   }
   
   return(p_summary)

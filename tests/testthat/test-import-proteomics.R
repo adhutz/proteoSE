@@ -13,7 +13,7 @@
 
 test_that("se_read_in (MaxQuant) reproduces the reference SummarizedExperiment", {
   skip_on_cran()
-  f <- system.file("extdata", "example_1_proteinGroups.txt", package = "sev")
+  f <- system.file("extdata", "example_1_proteinGroups.txt", package = "proteoSE")
   skip_if(f == "", "example_1_proteinGroups.txt not installed")
 
   se <- suppressWarnings(suppressMessages(se_read_in(f)))

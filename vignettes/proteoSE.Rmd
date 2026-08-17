@@ -1,8 +1,8 @@
 ---
-title: "The SEV Package"
+title: "The proteoSE Package"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{The SEV Package}
+  %\VignetteIndexEntry{The proteoSE Package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(message = FALSE)
 ```
 
 ```{r include=FALSE}
-library(sev2)
+library(proteoSE)
 library(DEP2)
 library(dplyr)
 library(clusterProfiler)
@@ -29,10 +29,10 @@ library(tidyr)
 library(magrittr)
 ```
 
-# sev - The SummarizedExperiment Viewer
+# proteoSE - Proteomics analysis on SummarizedExperiment
 
 ## Overview
-The sev package is a utility package that relies completely on the bioconductor packages DEP and iSEE/iSEEu for the analysis, adding only convenience functions, imputation methods and additional iSEE containers.
+The proteoSE package is a utility package that relies completely on the bioconductor packages DEP and iSEE/iSEEu for the analysis, adding only convenience functions, imputation methods and additional iSEE containers.
 
 ## Installation
 Open up R and run the following code:
@@ -44,8 +44,8 @@ if (!require("BiocManager", quietly = TRUE))
 BiocManager::install("iSEE")
 BiocManager::install("iSEEu")
 
-#All other dependencies are installed automatically with sev. 
-devtools::install_github("adhutz/sev")
+#All other dependencies are installed automatically with proteoSE. 
+devtools::install_github("adhutz/proteoSE")
 ```
 
 ## Data import
@@ -58,7 +58,7 @@ Example: "lfq_intensity_ctrl_rep_1"
 
 ```{r import-data}
 
-se <- sev2::se_read_in("../inst/extdata/example_1_proteinGroups.txt", sep = "_rep_")
+se <- proteoSE::se_read_in(system.file("extdata", "example_1_proteinGroups.txt", package = "proteoSE"), sep = "_rep_")
 
 se 
 ```
@@ -67,11 +67,11 @@ se
 For this, the design file must contain the columns "sample", "label", "condition", and "replicate". The column sample must contain the name of the column that stores the quantitative data (e.g. lfq values).
 
 ```{r import-data2}
-design <- read.csv(file = "../inst/extdata/example_1_design.txt")
+design <- read.csv(file = system.file("extdata", "example_1_design.txt", package = "proteoSE"))
 
 design
 
-se <- sev2::se_read_in("../inst/extdata/example_1_proteinGroups.txt", experimental_design = design)
+se <- proteoSE::se_read_in(system.file("extdata", "example_1_proteinGroups.txt", package = "proteoSE"), experimental_design = design)
 
 se
 ```
@@ -81,31 +81,31 @@ MS data can contain a lot of missing values. Ultimately, a part can be estimated
 
 ```{r filter}
 # Filter out samples with too many missing values
-se_filtered <- sev2::filter_perseus(se, perc_na = 0.33, filter_mode = "each_group")
+se_filtered <- proteoSE::filter_perseus(se, perc_na = 0.33, filter_mode = "each_group")
 ```
 
 ## Imputation
-Now that rows with too many missing values are excluded, we can replace NAs with values. The *dep2::impute()* function already provides a variety of options. The *sev* package builds on that, but saves the raw data including NAs in another assay instead of overwriting it. In addition, a binary assay with 1 for imputed values and 0 for measured values is created to easily visualize missing data via iSEE afterwards. 
+Now that rows with too many missing values are excluded, we can replace NAs with values. The *dep2::impute()* function already provides a variety of options. The *proteoSE* package builds on that, but saves the raw data including NAs in another assay instead of overwriting it. In addition, a binary assay with 1 for imputed values and 0 for measured values is created to easily visualize missing data via iSEE afterwards. 
 
 ### Possibility 1: Use DEP standard functions
 ```{r impute DEP}
-se_imp <- sev2::impute_DEP(se_filtered, fun="QRILC")
+se_imp <- proteoSE::impute_DEP(se_filtered, fun="QRILC")
 ```
 
 ### Possibility 2: Use mixed imputation for **MAR** vs. **MNAR**
-It is possible to distinguish different types of "missingness", termed either **missing at random (MAR)** or **missing not at random (MNAR)**. The *DEP* package already allows to select different imputation methods depending on if rows contain **MAR** or **MNAR** values via the *mixed* argument. For this, the column *randna* is necessary in the rowData that specifies the type of missingness. This column can now be added via the **sev2::add_randna()** function.
+It is possible to distinguish different types of "missingness", termed either **missing at random (MAR)** or **missing not at random (MNAR)**. The *DEP* package already allows to select different imputation methods depending on if rows contain **MAR** or **MNAR** values via the *mixed* argument. For this, the column *randna* is necessary in the rowData that specifies the type of missingness. This column can now be added via the **proteoSE::add_randna()** function.
 
 ```{r}
-se_randna <- sev2::add_randna(se_filtered)
+se_randna <- proteoSE::add_randna(se_filtered)
 
-se_imp <- sev2::impute_DEP(se_randna, randna = rowData(se_randna)$randna, fun = "mixed", mar = "knn", mnar = "QRILC")
+se_imp <- proteoSE::impute_DEP(se_randna, randna = rowData(se_randna)$randna, fun = "mixed", mar = "knn", mnar = "QRILC")
 ```
 
 ### Possibility 3: Use Perseus method
 A common approach is to replace NAs with small values, as missing data appears with a higher rate for low abundance proteins. The standard function in Perseus is, to replace missing values by drawing from a left shiftet gaussian distribution. 
 
 ```{r impute-perseus}
-se_imp <- sev2::impute_perseus(se_filtered)
+se_imp <- proteoSE::impute_perseus(se_filtered)
 
 ```
 
@@ -132,7 +132,7 @@ The *clusterProfiler::gseGO()* function is used to perform GO-term enrichment an
 
 ```{r GO-term-enrichment}
 
-se_GO <- sev2::se_GOE(se_diff_spec, col_names = "griesser_heat_vs_no_glom_heat_diff", OrgDb = "org.Hs.eg.db", pvalueCutoff = 0.5)
+se_GO <- proteoSE::se_GOE(se_diff_spec, col_names = "griesser_heat_vs_no_glom_heat_diff", OrgDb = "org.Hs.eg.db", pvalueCutoff = 0.5)
 
 ```
 
@@ -166,7 +166,7 @@ Tp use the additional containers, it is necessary to register columns that store
 
 ```{r iSEE-prep}
 # assay(se_GO) <- assays(se_GO)$imputed_perseus
-isee_object <- sev2::se_to_isee(se_GO)
+isee_object <- proteoSE::se_to_isee(se_GO)
 
 ```
 
@@ -175,7 +175,7 @@ You can start the app by calling or even store it as a Rda file for future use.
 
 ```{r iSEE-app}
 # create app with custom plots
-app <- sev2::isee_mini(isee_object)
+app <- proteoSE::isee_mini(isee_object)
 
 ```
 
@@ -183,15 +183,16 @@ app <- sev2::isee_mini(isee_object)
 The input file might contain a lot of additional information that is not of interest for you. The *minimal_data()* function returns the object with only the bare necesseties. It is fairly easy (it only uses *dplyr::select()* internally), so have a look at it if you need to delete further columns (e.g. if you are only interested in certain comparisons).
 
 ```{r reduce-rowData}
-minimal_data <- sev2::make_mini(isee_object)
+minimal_data <- proteoSE::make_mini(isee_object)
 ```
 
 ## Save results
 SummarizedExperiments can be saved like any other R object and read back in via *load()*. Make sure to do this at the end of your analysis. 
 ```{r save-results}
-save(isee_object, file = "../inst/extdata/isee_object.rda")
+f <- file.path(tempdir(), "isee_object.rda")
+save(isee_object, file = f)
 
-load("../inst/extdata/isee_object.rda")
+load(f)
 ```
 
 ## Session information

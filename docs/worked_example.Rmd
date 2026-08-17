@@ -1,5 +1,5 @@
 ---
-title: "sev2 example"
+title: "proteoSE example"
 author: "Arvid Hutzfeldt"
 date: "`r format(Sys.time(), '%d %m %Y')`"
 output: 
@@ -12,11 +12,11 @@ output:
     theme: lumen
 ---
 
-# A complete sev2 run: the "U2OS stress-response" example project
+# A complete proteoSE run: the "U2OS stress-response" example project
 
-This walkthrough takes one made-up project from raw search-engine output all the way to an interactive results browser, using nothing but `sev2` and the Bioconductor packages it builds on. Every step shows the code you would run, the console output it produces, and — where a picture helps — a real figure generated from the bundled example data.
+This walkthrough takes one made-up project from raw search-engine output all the way to an interactive results browser, using nothing but `proteoSE` and the Bioconductor packages it builds on. Every step shows the code you would run, the console output it produces, and — where a picture helps — a real figure generated from the bundled example data.
 
-> New to Bioconductor or the `SummarizedExperiment` class? Skim the companion slide deck (`docs/sev2_pipeline_intro.pptx`) first — it explains the one data structure that every step below reads from and writes to.
+> New to Bioconductor or the `SummarizedExperiment` class? Skim the companion slide deck (`docs/proteoSE_pipeline_intro.pptx`) first — it explains the one data structure that every step below reads from and writes to.
 >
 > The figures on this page are produced by `data-raw/make_worked_example_figures.R`; re-run it to regenerate them.
 
@@ -40,15 +40,15 @@ The two input files ship with the package:
 ## 0. Setup
 
 ```{r}
-library(sev2)
+library(proteoSE)
 library(DEP2)                 # test_diff(), add_rejections(), QC plots
 library(SummarizedExperiment) # assay(), rowData(), colData(), metadata()
 
-report_path <- system.file("extdata", "example_project_report.tsv",     package = "sev2")
-cond_path   <- system.file("extdata", "example_project_conditions.tsv", package = "sev2")
+report_path <- system.file("extdata", "example_project_report.tsv",     package = "proteoSE")
+cond_path   <- system.file("extdata", "example_project_conditions.tsv", package = "proteoSE")
 ```
 
-> **Heads-up — a name clash.** DEP2 *also* exports a `plot_volcano()`, so once `library(DEP2)` is attached it masks sev2's. When you want sev2's richer volcano, call it fully qualified: `sev2::plot_volcano(...)`.
+> **Heads-up — a name clash.** DEP2 *also* exports a `plot_volcano()`, so once `library(DEP2)` is attached it masks proteoSE's. When you want proteoSE's richer volcano, call it fully qualified: `proteoSE::plot_volcano(...)`.
 
 ## 1. Import → SummarizedExperiment
 
@@ -62,7 +62,7 @@ se <- optimized_spectronaut_to_se(
 )
 
 # The importer leaves the primary assay unnamed; name it so the downstream
-# sev2 helpers (which add extra assays alongside it) have something to anchor to.
+# proteoSE helpers (which add extra assays alongside it) have something to anchor to.
 assayNames(se)[1] <- "lfq_raw"
 
 se
@@ -118,7 +118,7 @@ We drop \~29% of protein groups — the ones too sparse to test reliably — and
 
 ## 3. Impute the remaining missing values
 
-`impute_perseus()` replaces the leftover NAs by drawing from a left-shifted, narrowed Gaussian per sample — the classic Perseus approach, and the right choice given the low-abundance dropout we just saw. Crucially, sev2 does **not** overwrite your data: the raw matrix is preserved in its own assay, and a binary mask records which cells were imputed.
+`impute_perseus()` replaces the leftover NAs by drawing from a left-shifted, narrowed Gaussian per sample — the classic Perseus approach, and the right choice given the low-abundance dropout we just saw. Crucially, proteoSE does **not** overwrite your data: the raw matrix is preserved in its own assay, and a binary mask records which cells were imputed.
 
 ```{r}
 se_imp <- impute_perseus(se_filt)
@@ -199,11 +199,11 @@ DEP2::plot_cor(se_imp)
 
 ![Sample correlation heatmap](figures/09_cor.png)
 
-sev2's `plot_volcano()` renders a publication-ready volcano straight from the `rowData` results. `sig_from_column = TRUE` colours points using the `_significant` column we just added, and the top hits are labelled automatically.
+proteoSE's `plot_volcano()` renders a publication-ready volcano straight from the `rowData` results. `sig_from_column = TRUE` colours points using the `_significant` column we just added, and the top hits are labelled automatically.
 
 ```{r}
-# sev2:: because DEP2's plot_volcano is masking it (see Setup)
-vA <- sev2::plot_volcano(se_diff, contrast = "TreatA_vs_Ctrl",
+# proteoSE:: because DEP2's plot_volcano is masking it (see Setup)
+vA <- proteoSE::plot_volcano(se_diff, contrast = "TreatA_vs_Ctrl",
                          sig_from_column = TRUE, top_n_sign = 12)
 vA$plot_out
 ```
@@ -211,7 +211,7 @@ vA$plot_out
 ![Volcano plot, TreatA vs Ctrl](figures/10_volcano_A.png)
 
 ```{r}
-sev2::plot_volcano(se_diff, contrast = "TreatB_vs_Ctrl",
+proteoSE::plot_volcano(se_diff, contrast = "TreatB_vs_Ctrl",
                    sig_from_column = TRUE, top_n_sign = 12)$plot_out
 ```
 
@@ -227,7 +227,7 @@ DEP2::plot_heatmap(sig_se, type = "centered", kmeans = TRUE, k = 4,
 
 ![Clustered heatmap of significant proteins](figures/12_heatmap.png)
 
-> sev2 also wraps this as `plot_heatmap_clustered()`, which additionally returns the per-cluster protein lists — handy when you want to feed one cluster into enrichment.
+> proteoSE also wraps this as `plot_heatmap_clustered()`, which additionally returns the per-cluster protein lists — handy when you want to feed one cluster into enrichment.
 
 ## 6. Functional enrichment (GO / GSEA)
 
@@ -294,7 +294,7 @@ ora_up_condA %>% as.data.frame() %>%
 
 ## 7. Explore interactively with iSEE
 
-`se_to_isee()` registers the fold-change / p-value columns and the enrichment metadata so sev2's custom panels (volcano, NCBI gene links, GO table) work; `isee_mini()` launches the app.
+`se_to_isee()` registers the fold-change / p-value columns and the enrichment metadata so proteoSE's custom panels (volcano, NCBI gene links, GO table) work; `isee_mini()` launches the app.
 
 ```{r}
 isee_object <- se_to_isee(se_go)
@@ -323,7 +323,7 @@ Spectronaut report ─▶ optimized_spectronaut_to_se()  →  SE (4000 × 15)
                     ─▶ impute_perseus()               →  no NAs, raw kept
                     ─▶ plot_pca / plot_cor            →  conditions separate
                     ─▶ test_diff() + add_rejections() →  92 / 102 hits
-                    ─▶ sev2::plot_volcano() + heatmap →  visualise the response
+                    ─▶ proteoSE::plot_volcano() + heatmap →  visualise the response
                     ─▶ enrich_go_se()                 →  GO terms in metadata()
                     ─▶ se_to_isee() + isee_mini()     →  interactive app
 ```

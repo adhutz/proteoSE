@@ -1,6 +1,6 @@
 # General plotting (volcano, scatter, heatmap, correlation)
 #
-# Part of the 'sev' package. Grouped by theme during the 2026 refactor
+# Part of the 'proteoSE' package. Grouped by theme during the 2026 refactor
 # (see AUDIT.md). Function bodies are preserved verbatim from the original
 # main.R / mlasse.txt; renames and cleanup follow in later phases.
 
@@ -1516,9 +1516,9 @@ plot_2D_scatter <- function(
 #' @examples
 #' library(ggplot2)
 #' p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point()
-#' p + theme_sev()
+#' p + theme_proteoSE()
 #' @export
-theme_sev <- function() {
+theme_proteoSE <- function() {
   DEP2::theme_DEP1() +
     theme(
       axis.text.x = element_text(angle = 45, hjust = 1)

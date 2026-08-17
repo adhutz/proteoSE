@@ -1,7 +1,7 @@
-# Test helpers for sev.
+# Test helpers for proteoSE.
 #
 # `make_test_se()` builds a tiny SummarizedExperiment with the column/assay
-# conventions sev expects (gene_names, condition, replicate), for use as a
+# conventions proteoSE expects (gene_names, condition, replicate), for use as a
 # fixture in unit tests. Real tests are added in Phase 4 of the refactor
 # (see AUDIT.md, section 8).
 

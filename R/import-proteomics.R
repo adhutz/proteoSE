@@ -1,6 +1,6 @@
 # Import protein-level search-engine output into a SummarizedExperiment
 #
-# Part of the 'sev' package. Grouped by theme during the 2026 refactor
+# Part of the 'proteoSE' package. Grouped by theme during the 2026 refactor
 # (see AUDIT.md). Function bodies are preserved verbatim from the original
 # main.R / mlasse.txt; renames and cleanup follow in later phases.
 
@@ -528,7 +528,7 @@ optimized_spectronaut_to_se <- function(candidates = NULL, report = NULL, contra
   # Create the SummarizedExperiment object
   se <- DEP2::make_se(combined, grep(paste0(".*_", quant_col), colnames(combined)), coldata, log2transform = ifelse(quant_col == "log2quantity", FALSE, TRUE))
   
-  # Add 'sample' column for compatibility with SEV filtering functions
+  # Add 'sample' column for compatibility with proteoSE filtering functions
   colData(se)$sample <- colData(se)$ID
   
   # Return the SE object

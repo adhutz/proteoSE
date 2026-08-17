@@ -1,12 +1,18 @@
 
-# **sev2 - The SummarizedExperiment Viewer**
+# **proteoSE - Proteomics and Phosphoproteomics Analysis on SummarizedExperiment**
 
 ## Overview
-The sev2 package is a utility package that relies completely on the bioconductor packages *DEP2* and *iSEE* / *iSEEu* for the analysis, adding convenience functions, imputation methods, GO-term enrichment via *clusterProfiler* and additional *iSEE* containers.
+`proteoSE` is a utility toolkit for (phospho)proteomics data analysis, organised around the
+Bioconductor `SummarizedExperiment` class. One object carries your data from raw search-engine
+output all the way to results: import (Spectronaut, MaxQuant, FragPipe), experiment design,
+filtering, missing-value imputation, differential-abundance testing, GO-term and gene-set
+enrichment, kinase-substrate and signalome analysis, STRING networks, and publication-ready
+figures. It builds on *DEP2*, *limma*, *PhosR*, *clusterProfiler* and *iSEE* / *iSEEu*.
 
-> **Note:** `sev2` is the refactored successor to the original `sev`. It installs under a
-> distinct package name, so you can keep `sev` and `sev2` installed side by side
-> (`library(sev)` vs `library(sev2)`).
+> **Note:** `proteoSE` was previously released as `sev` and then `sev2`. It installs under a
+> distinct package name, so older installs keep working side by side
+> (`library(sev)` vs `library(proteoSE)`). Renamed exports keep deprecated aliases for one
+> release cycle — e.g. `theme_sev()` still works and points you at `theme_proteoSE()`.
 
 ## Installation
 Open up R and run the following code:
@@ -24,25 +30,25 @@ if (!require("DO.db", quietly = TRUE))
 
 # All other dependencies (CRAN, Bioconductor and the two GitHub-only packages
 # DEP2 and uniprotREST) are resolved automatically from DESCRIPTION.
-devtools::install_github("adhutz/sev2")
+devtools::install_github("adhutz/proteoSE")
 ```
 
 ## Worked example
 [`docs/worked_example.md`](docs/worked_example.md) walks one fictional project all the
 way from a raw Spectronaut report to an interactive `iSEE` browser, with real figures
 generated from the bundled example data. The companion slide deck
-`docs/sev2_pipeline_intro.pptx` introduces the `SummarizedExperiment` structure that
+`docs/proteoSE_pipeline_intro.pptx` introduces the `SummarizedExperiment` structure that
 every step reads from and writes to.
 
 ## View vignette
 An examplary analysis is included as a vignette.
 ```{r eval = FALSE, echo=T}
-vignette("sev")
+vignette("proteoSE")
 ```
 
 ## Run example
 The examplary analysis is also included in the installation folder as an Rmarkdown document together with the proteinGroups.txt file. To open the corresponding folder directly, run the following code.
 ```{r eval = FALSE, echo=T}
-utils::browseURL(system.file("extdata", package = "sev2"))
+utils::browseURL(system.file("extdata", package = "proteoSE"))
 ```
 

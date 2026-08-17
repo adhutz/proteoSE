@@ -1,4 +1,4 @@
-#' sev: The SummarizedExperiment Viewer for Proteomics Analysis
+#' proteoSE: Proteomics and Phosphoproteomics Analysis on SummarizedExperiment
 #'
 #' A utility toolkit for (phospho)proteomics data analysis organised around the
 #' Bioconductor [SummarizedExperiment::SummarizedExperiment] class. It provides
@@ -13,7 +13,7 @@
 #'
 #' @section Namespace conflict policy:
 #' **dplyr wins every name collision.** Where another imported package exports a
-#' name dplyr also exports, dplyr's version is the one bound in the sev2
+#' name dplyr also exports, dplyr's version is the one bound in the proteoSE
 #' namespace, and the other package's version must be called fully qualified
 #' (e.g. `AnnotationDbi::select()`, `MSnbase::combine()`). Two consequences for
 #' anyone editing `R/`:

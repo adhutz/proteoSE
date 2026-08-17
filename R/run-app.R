@@ -21,9 +21,9 @@ run_dep_lfq_app <- function(...) {
     stop("Package 'shiny' is required to run the app. ",
          "Install it with install.packages('shiny').", call. = FALSE)
   }
-  app_dir <- system.file("shiny", "dep_lfq", package = "sev")
+  app_dir <- system.file("shiny", "dep_lfq", package = "proteoSE")
   if (!nzchar(app_dir)) {
-    stop("Could not locate the 'dep_lfq' Shiny app. Try re-installing 'sev'.",
+    stop("Could not locate the 'dep_lfq' Shiny app. Try re-installing 'proteoSE'.",
          call. = FALSE)
   }
   shiny::runApp(app_dir, ...)

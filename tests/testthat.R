@@ -1,4 +1,4 @@
 library(testthat)
-library(sev2)
+library(proteoSE)
 
-test_check("sev2")
+test_check("proteoSE")

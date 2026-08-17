@@ -1,7 +1,7 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# R CMD check for the sev package.
+# R CMD check for the proteoSE package.
 #
-# sev depends on a large Bioconductor stack plus two GitHub-only packages
+# proteoSE depends on a large Bioconductor stack plus two GitHub-only packages
 # (DEP2, uniprotREST, declared in DESCRIPTION `Remotes:`). pak resolves CRAN,
 # Bioconductor and GitHub sources, so dependency install is handled by
 # r-lib/actions/setup-r-dependencies. Because the dependency tree is heavy, the
