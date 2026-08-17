@@ -15,3 +15,6 @@
 ^experiment_design\.csv$
 ^experiment_design\.xlsx$
 ^r_session_info$
+^docs$
+^~\$
+^CLAUDE\.local\.md$

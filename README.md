@@ -18,15 +18,24 @@ if (!require("BiocManager", quietly = TRUE))
 if (!require("devtools", quietly = TRUE))
     install.packages("devtools")
     
+# DO.db is a Bioconductor annotation package, not a CRAN one.
 if (!require("DO.db", quietly = TRUE))
-    install.packages("DO.db")
+    BiocManager::install("DO.db")
 
-#All other dependencies are installed automatically with sev2. 
+# All other dependencies (CRAN, Bioconductor and the two GitHub-only packages
+# DEP2 and uniprotREST) are resolved automatically from DESCRIPTION.
 devtools::install_github("adhutz/sev2")
 ```
 
+## Worked example
+[`docs/worked_example.md`](docs/worked_example.md) walks one fictional project all the
+way from a raw Spectronaut report to an interactive `iSEE` browser, with real figures
+generated from the bundled example data. The companion slide deck
+`docs/sev2_pipeline_intro.pptx` introduces the `SummarizedExperiment` structure that
+every step reads from and writes to.
+
 ## View vignette
-An examplary analysis is included as a vignette. 
+An examplary analysis is included as a vignette.
 ```{r eval = FALSE, echo=T}
 vignette("sev")
 ```
@@ -34,6 +43,6 @@ vignette("sev")
 ## Run example
 The examplary analysis is also included in the installation folder as an Rmarkdown document together with the proteinGroups.txt file. To open the corresponding folder directly, run the following code.
 ```{r eval = FALSE, echo=T}
-utils::browseURL(system.file("extdata", package = "sev"))
+utils::browseURL(system.file("extdata", package = "sev2"))
 ```
 

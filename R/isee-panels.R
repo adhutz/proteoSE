@@ -228,7 +228,9 @@ setMethod(".hideInterface", "GOTable", function(x, field) {
 setMethod(".generateOutput", "GOTable", function(x, se, ..., all_memory, all_contents) {
   envir <- new.env()
   commands <- c("require(GO.db);",
-                "tab <- select(GO.db, keys=keys(GO.db), columns='TERM');",
+                # Fully qualified on purpose: sev2 imports dplyr::select, so a
+                # bare select() here would dispatch to dplyr and fail on GO.db.
+                "tab <- AnnotationDbi::select(GO.db, keys=AnnotationDbi::keys(GO.db), columns='TERM');",
                 "rownames(tab) <- tab$GOID;",
                 "tab$GOID <- NULL;")
   eval(parse(text=commands), envir=envir)

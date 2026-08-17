@@ -11,6 +11,21 @@
 #' overview of the refactoring history and outstanding cleanup tasks, see
 #' `AUDIT.md` and `CHANGES_phase0-1.md` in the package root.
 #'
+#' @section Namespace conflict policy:
+#' **dplyr wins every name collision.** Where another imported package exports a
+#' name dplyr also exports, dplyr's version is the one bound in the sev2
+#' namespace, and the other package's version must be called fully qualified
+#' (e.g. `AnnotationDbi::select()`, `MSnbase::combine()`). Two consequences for
+#' anyone editing `R/`:
+#'
+#' - Never `@importFrom` a name that dplyr also exports. Qualify the call site
+#'   instead. Relying on NAMESPACE ordering to break the tie is fragile — the
+#'   file is alphabetically generated, so the winner can flip when an import is
+#'   added.
+#' - The same applies inside strings that are later `parse()`d and `eval()`ed
+#'   (see the iSEE panel command blocks in `R/isee-panels.R`): they resolve
+#'   through this namespace, so a bare `select()` there means `dplyr::select()`.
+#'
 #' @keywords internal
 #' @importFrom grDevices dev.off pdf
 #' @importFrom stats aggregate formula lm median na.omit reorder rnorm runif sd

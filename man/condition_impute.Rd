@@ -22,7 +22,7 @@ Proteomics data in a \code{\link[SummarizedExperiment]{SummarizedExperiment}} ob
 Imputation method to use. Available options include:
 \code{"QRILC"}, \code{"bpca"}, \code{"knn"}, \code{"MLE"}, \code{"MinDet"}, \code{"MinProb"},
 \code{"man"}, \code{"min"}, \code{"zero"}, \code{"mixed"}, \code{"nbavg"}, \code{"RF"}, \code{"GSimp"}.
-See \code{\link[MSnbase]{impute,MSnSet-method}}, \code{\link{manual_impute}}, and
+See \code{\link[MSnbase]{impute,MSnSet-method}}, \code{\link[DEP2]{manual_impute}}, and
 \code{\link[missForest]{missForest}} for details.}
 
 \item{percent}{Numeric
@@ -39,7 +39,7 @@ Logical operator to apply for filtering rows. Options are: \code{">"}, \code{"<"
 
 \item{...}{Additional arguments for specific imputation methods. For example:
 \itemize{
-\item \code{man}: \code{\link{manual_impute}} supports \code{shift} and \code{scale}.
+\item \code{man}: \code{\link[DEP2]{manual_impute}} supports \code{shift} and \code{scale}.
 \item \code{RF}: \code{\link[missForest]{missForest}} supports \code{ntree} and \code{parallelize}.
 \item Other methods: See \code{\link[MSnbase]{impute,MSnSet-method}}.
 }}

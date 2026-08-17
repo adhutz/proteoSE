@@ -486,7 +486,7 @@ build_go_terms <- function(
 #'   dplyr::filter(evidence %in% experimental)
 #' }
 #'
-#' @importFrom AnnotationDbi keys select
+#' @importFrom AnnotationDbi keys
 #' @importFrom dplyr filter left_join select
 #' @importFrom janitor clean_names
 #'

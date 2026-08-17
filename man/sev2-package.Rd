@@ -18,6 +18,24 @@ The package source is grouped by theme (see the file names in \verb{R/}). For an
 overview of the refactoring history and outstanding cleanup tasks, see
 \code{AUDIT.md} and \verb{CHANGES_phase0-1.md} in the package root.
 }
+\section{Namespace conflict policy}{
+
+\strong{dplyr wins every name collision.} Where another imported package exports a
+name dplyr also exports, dplyr's version is the one bound in the sev2
+namespace, and the other package's version must be called fully qualified
+(e.g. \code{AnnotationDbi::select()}, \code{MSnbase::combine()}). Two consequences for
+anyone editing \verb{R/}:
+\itemize{
+\item Never \verb{@importFrom} a name that dplyr also exports. Qualify the call site
+instead. Relying on NAMESPACE ordering to break the tie is fragile — the
+file is alphabetically generated, so the winner can flip when an import is
+added.
+\item The same applies inside strings that are later \code{parse()}d and \code{eval()}ed
+(see the iSEE panel command blocks in \code{R/isee-panels.R}): they resolve
+through this namespace, so a bare \code{select()} there means \code{dplyr::select()}.
+}
+}
+
 \seealso{
 Useful links:
 \itemize{

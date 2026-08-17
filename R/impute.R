@@ -140,7 +140,7 @@ impute_DEP2 <- function(se, fun = c("bpca", "knn", "QRILC", "MLE", "MinDet", "Mi
 #'   Imputation method to use. Available options include:
 #'   \code{"QRILC"}, \code{"bpca"}, \code{"knn"}, \code{"MLE"}, \code{"MinDet"}, \code{"MinProb"},
 #'   \code{"man"}, \code{"min"}, \code{"zero"}, \code{"mixed"}, \code{"nbavg"}, \code{"RF"}, \code{"GSimp"}.
-#'   See \code{\link[MSnbase]{impute,MSnSet-method}}, \code{\link{manual_impute}}, and
+#'   See \code{\link[MSnbase]{impute,MSnSet-method}}, \code{\link[DEP2]{manual_impute}}, and
 #'   \code{\link[missForest]{missForest}} for details.
 #' @param percent Numeric
 #'   A value between 0 and 1 specifying the percentage threshold for filtering rows based
@@ -153,7 +153,7 @@ impute_DEP2 <- function(se, fun = c("bpca", "knn", "QRILC", "MLE", "MinDet", "Mi
 #'   \code{">="}, \code{"<="}, \code{"=="}, \code{"!="}.
 #' @param ... Additional arguments for specific imputation methods. For example:
 #'   \itemize{
-#'     \item \code{man}: \code{\link{manual_impute}} supports \code{shift} and \code{scale}.
+#'     \item \code{man}: \code{\link[DEP2]{manual_impute}} supports \code{shift} and \code{scale}.
 #'     \item \code{RF}: \code{\link[missForest]{missForest}} supports \code{ntree} and \code{parallelize}.
 #'     \item Other methods: See \code{\link[MSnbase]{impute,MSnSet-method}}.
 #'   }
@@ -187,7 +187,7 @@ impute_DEP2 <- function(se, fun = c("bpca", "knn", "QRILC", "MLE", "MinDet", "Mi
 #'
 #' }
 #' @import SummarizedExperiment
-#' @import MSnbase
+#' @rawNamespace import(MSnbase, except = combine)
 #' @import assertthat
 #' @export
 condition_impute <- function(se, 

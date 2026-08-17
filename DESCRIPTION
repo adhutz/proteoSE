@@ -20,7 +20,7 @@ BugReports: https://github.com/adhutz/sev2/issues
 biocViews: Proteomics, MassSpectrometry, DifferentialExpression,
     GeneSetEnrichment, Network, Visualization
 Depends:
-    R (>= 4.2)
+    R (>= 4.3)
 Imports:
     AnnotationDbi,
     assertthat,
@@ -83,6 +83,7 @@ Suggests:
     ComplexHeatmap,
     doParallel,
     DT,
+    ggrastr,
     knitr,
     missForest,
     openxlsx,
