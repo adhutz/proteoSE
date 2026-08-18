@@ -187,7 +187,6 @@ impute_DEP2 <- function(se, fun = c("bpca", "knn", "QRILC", "MLE", "MinDet", "Mi
 #'
 #' }
 #' @import SummarizedExperiment
-#' @rawNamespace import(MSnbase, except = combine)
 #' @import assertthat
 #' @export
 condition_impute <- function(se, 

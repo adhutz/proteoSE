@@ -12,7 +12,6 @@
 #' @param se An se object.
 #' @return A data frame.
 #' @importFrom tidyr pivot_longer pivot_wider
-#' @importFrom tidyselect ends_with
 #' @import dplyr
 #' @examples
 #' # Example usage:

@@ -4,6 +4,15 @@
 # (see AUDIT.md). Function bodies are preserved verbatim from the original
 # main.R / mlasse.txt; renames and cleanup follow in later phases.
 
+# Guard for a package in Suggests. `purpose` completes "... is required to <purpose>".
+.require_pkg <- function(pkg, purpose) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    stop("Package '", pkg, "' is required to ", purpose, ". Install it with ",
+         "install.packages('", pkg, "') or BiocManager::install('", pkg, "').",
+         call. = FALSE)
+  }
+}
+
 
 #' Extract the centered substring of a given length from an input string
 #'
@@ -157,9 +166,10 @@ clean_values_colwise <- function(x) {
 #' df2 <- data.frame(id = 1:3, val = c("a", NA, "c"))
 #' result <- compare_dataframes_full(df1, df2)
 #'
-#' @importFrom waldo compare
 #' @export
 compare_dataframes_full <- function(df1, df2, max_diffs = Inf) {
+  .require_pkg("waldo", "show the detailed diff")
+
   cat("=== DATAFRAME COMPARISON REPORT ===\n\n")
   
   # Dimensions

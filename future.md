@@ -12,8 +12,8 @@ package is `proteoSE` 0.1.0 (formerly `sev`, then `sev2`), 23 themed `R/*.R` fil
 exports, renamed functions carry `.Deprecated()` aliases in `R/deprecated.R`, and
 `devtools::test()` is **60 passing / 0 failing**. `R CMD check` on the *tracked* tree with
 the CI workflow's own arguments gives **0 ERRORS / 2 WARNINGS / 1 NOTE** — both warnings
-are the un-built `inst/doc` vignettes; the note covers the `:::` calls into
-`GOSemSim`/`iSEE` plus the two org annotation packages, which are declared in
+are the un-built `inst/doc` vignettes; the note covers the `:::` call into
+`iSEE` plus the two org annotation packages, which are declared in
 `Imports` so they get installed but are referenced by name at runtime, never
 imported from.
 Three vignettes exist plus a worked example (`docs/worked_example.Rmd`) driven by bundled
@@ -300,7 +300,7 @@ se <- optimized_spectronaut_to_se(report, conditions)
 
 ---
 
-## 11. Dependency slimming + install reliability **[plan: `plans/deps-and-install.md`]**
+## 11. Dependency slimming + install reliability **[plan: `plans/deps-and-install.md`]** **[DONE]**
 
 **Problem.** `DESCRIPTION` declares **55 hard `Imports`** (against 18 `Suggests`),
 spanning CRAN, Bioconductor and two GitHub-only packages (`DEP2`, `uniprotREST`, declared
@@ -326,11 +326,30 @@ most of what this item was guessing at:
   string. Accepted deliberately.
 - **`DO.db` is required by nothing** -- not one package in a fresh ~350-package tree
   declares it (DOSE moved to `HDO.db`), so the README's manual install step is stale.
-- **Still true:** several `Imports` are used exactly once (`DescTools`, `IRanges`,
-  `KEGGREST`, `SingleCellExperiment`, `ggraph`, `tidyselect`) -- a whole package pulled in
-  for one call. That is what step 3 of the plan is for.
+- **Single-use `Imports` were mostly free.** Measured with
+  `tools::package_dependencies(recursive = TRUE)`: `IRanges`, `KEGGREST`,
+  `SingleCellExperiment`, `MSnbase`, `plyr`, `qvalue`, `fdrtool` and `GOSemSim` all
+  already arrive transitively via `DEP2` / `clusterProfiler` / `SummarizedExperiment` /
+  `iSEE`, so moving them to `Suggests` would have saved **zero** install time. Measure
+  before slimming; "used once" is not the same as "costs anything".
 
-**Proposal.** (a) Verify the install empirically — CI already does a from-scratch
+**Done (branch `deps-slimming`).** `Imports` 55 -> 48; a fresh install pulls **~28 fewer
+packages**. Four dependencies were deleted rather than demoted, because the code that
+replaced them was shorter than the dependency: `DescTools::Closest` -> `.closest()` (-12
+packages), `gdata::cbindX` -> `.cbind_pad()` (-2), `GOSemSim:::getOffsprings/getAncestors`
+-> `.go_relatives()` reading `GO.db` directly, and `tidyselect`, which only ever supplied
+an `ends_with()` that `dplyr` re-exports. Four moved to `Suggests` behind `.require_pkg()`
+guards: `cmapR` (-6), `ggraph` (-3), `iSEEu` (-3), `waldo` (-2). The wholesale
+`import(MSnbase, except = combine)` is gone too -- only three qualified calls ever used it
+-- which retires the standing namespace-replacement WARNING. `iSEE` itself has to stay in
+`Imports`: `R/isee-panels.R` defines S4 classes that inherit from it at load time.
+
+The `importFrom()` audit came back clean: every target resolves against the installed tree,
+and CI runs 14/15 prove the same against a freshly resolved one. The real version-drift
+risk of the `parse_ratio` shape was the two `:::` calls; the `GOSemSim` pair is now gone
+and only `iSEE:::.flagMultiSelect` remains, in `R/isee-panels.R`.
+
+**Proposal (original).** (a) Verify the install empirically — CI already does a from-scratch
 dependency resolve, and a clean-library install locally reproduces a new user exactly;
 (b) declare the missing annotation packages; (c) move the optional/single-use ones to
 `Suggests` behind `requireNamespace()` guards, following the pattern already used in
