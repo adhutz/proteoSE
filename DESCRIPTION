@@ -31,7 +31,6 @@ Imports:
     DEP2,
     DescTools,
     digest,
-    DOSE,
     dplyr,
     fdrtool,
     forcats,

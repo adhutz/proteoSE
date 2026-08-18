@@ -82,6 +82,21 @@ enrich_go_se <- function(se, col_names =c(), simplify = TRUE, ont="all", keyType
 }
 
 
+#' Turn a clusterProfiler "k/n" ratio string into a number
+#'
+#' Formerly `DOSE::parse_ratio()`, which current DOSE no longer exports -- the
+#' stale import made the package fail to load on any fresh install. Same
+#' arithmetic, two lines, one Bioconductor dependency less.
+#'
+#' @param ratio Character vector such as `"12/345"`.
+#' @return Numeric vector of the quotient.
+#' @noRd
+.parse_ratio <- function(ratio) {
+  parts <- strsplit(as.character(ratio), "/", fixed = TRUE)
+  vapply(parts, function(x) as.numeric(x[1]) / as.numeric(x[2]), numeric(1))
+}
+
+
 #' Perform Over-representation Analysis (ORA) on Phosphoproteomics Data
 #'
 #' This function takes a SummarizedExperiment object and conducts Over-representation Analysis (ORA) on proteins with at least one significant phosphosite, using the clusterProfiler package.
@@ -96,7 +111,6 @@ enrich_go_se <- function(se, col_names =c(), simplify = TRUE, ont="all", keyType
 #' @import dplyr
 #' @import ggplot2
 #' @importFrom clusterProfiler enrichGO
-#' @importFrom DOSE parse_ratio
 #' @export
 phospho_ora <- function(se, contr = "all", OrgDb = "org.Hs.eg.db", pvalueCutoff = 0.4, qvalueCutoff = 0.8, ont = c("BP", "MF", "CC")){
   
@@ -137,7 +151,7 @@ phospho_ora <- function(se, contr = "all", OrgDb = "org.Hs.eg.db", pvalueCutoff 
                         lapply(ora_res, 
                                function(x) do.call("rbind", x))
   ) %>%
-    mutate(FoldEnrichment = DOSE::parse_ratio(GeneRatio) / DOSE::parse_ratio(BgRatio))
+    mutate(FoldEnrichment = .parse_ratio(GeneRatio) / .parse_ratio(BgRatio))
   
   # Test if faceting variables have at least one value
   if(nrow(ora_res_df %>% filter(qvalue < 0.2)) > 0){

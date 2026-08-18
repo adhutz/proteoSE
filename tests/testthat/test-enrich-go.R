@@ -22,3 +22,11 @@ test_that("shorten_terms applies user replacements", {
   )
   expect_false(grepl("antigen", out, fixed = TRUE))
 })
+
+test_that(".parse_ratio turns clusterProfiler k/n strings into numbers", {
+  # Replaces DOSE::parse_ratio(), which current DOSE no longer exports.
+  expect_equal(.parse_ratio("12/345"), 12 / 345)
+  expect_equal(.parse_ratio(c("1/2", "3/4")), c(0.5, 0.75))
+  expect_equal(.parse_ratio(character(0)), numeric(0))
+  expect_true(is.na(.parse_ratio(NA_character_)))
+})
