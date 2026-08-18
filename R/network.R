@@ -58,7 +58,13 @@ get_network <- function(genes, species = 9606, expression_data = NA, expand = FA
                                                                            add_nodes))
   } 
   
-  if(ncol(int_net > 0)){
+  # Fail loudly: get_network() is memoised, and a NULL return here would be
+  # cached as if it were an answer.
+  if (NROW(int_net) == 0) {
+    stop("STRING returned no interactions for these genes at score >= ", score,
+         ". Lower `score`, set expand = TRUE, or check the gene symbols.",
+         call. = FALSE)
+  }
   
   # get stringIDs for all proteins of the expression table
   all_prots <- expression_data$gene_names %>% unlist() %>%
@@ -123,8 +129,5 @@ get_network <- function(genes, species = 9606, expression_data = NA, expand = FA
                                 "add_nodes" = add_nodes))
   
   return(result)
-  }else{
-    return(NULL)
-  }
 }
 
