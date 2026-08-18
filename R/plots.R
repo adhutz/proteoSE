@@ -4,6 +4,20 @@
 # (see AUDIT.md). Function bodies are preserved verbatim from the original
 # main.R / mlasse.txt; renames and cleanup follow in later phases.
 
+# Smallest value in `x` closest to `a`. Replaces min(DescTools::Closest(x, a)),
+# which cost a 13-package dependency for this one line.
+.closest <- function(x, a) {
+  d <- abs(x - a)
+  min(x[d == min(d, na.rm = TRUE)], na.rm = TRUE)
+}
+
+# cbind data frames of unequal length, padding short ones with NA.
+# Replaces gdata::cbindX; data-frame row indexing past the end yields NA rows.
+.cbind_pad <- function(dfs) {
+  n <- max(vapply(dfs, nrow, integer(1)))
+  do.call(cbind, lapply(dfs, function(d) d[seq_len(n), , drop = FALSE]))
+}
+
 
 #' Volcano Plot for Proteomics and Phosphoproteomics
 #'
@@ -502,7 +516,6 @@ plot_volcano <- function(
 #' @importFrom dplyr group_by summarize filter ungroup select mutate mutate_all rename rename_all
 #' @importFrom stats cor.test
 #' @importFrom ggrepel geom_text_repel
-#' @importFrom DescTools Closest
 #' @importFrom stringr str_wrap
 #' @export
 
@@ -546,10 +559,10 @@ plot_scatter <- function(df, col_x, col_y, col_label = "gene_names", show_labels
   cbPalette <- c("#dddddd","#0000ff", "#00ff00")
   df = data.frame(x=x, y=y)
   
-  up<-data.frame("x"=lapply(df$x, function(i) min(Closest(x=sdpdf$x,a=i)))%>%unlist(),"x_old"=df$x,"y"=df$y, "col_label"=col_label)
+  up<-data.frame("x"=lapply(df$x, function(i) .closest(sdpdf$x, i))%>%unlist(),"x_old"=df$x,"y"=df$y, "col_label"=col_label)
   up_col_labels<-merge(up,sdpdf, by="x")%>%filter(y.x>=y.y)
-  
-  down<-data.frame("x"=lapply(df$x, function(i) min(Closest(x=sdmdf$x,a=i)))%>%unlist(),"x_old"=df$x,"y"=df$y, "col_label"=col_label)
+
+  down<-data.frame("x"=lapply(df$x, function(i) .closest(sdmdf$x, i))%>%unlist(),"x_old"=df$x,"y"=df$y, "col_label"=col_label)
   down_col_labels<-merge(down,sdmdf, by="x")%>%filter(y.x<=y.y)
   
   pearson<-cor.test(x,y)
@@ -739,7 +752,6 @@ plot_correlation <- function(df, x_column, y_column, label_names, gene_list = c(
 #' @return A list containing the heatmap plot, a data frame with the heatmap data, and a data frame with the protein clusters.
 #'
 #' @importFrom DEP2 plot_heatmap
-#' @importFrom gdata cbindX
 #' @import dplyr
 #' @export
 #' @examples
@@ -758,7 +770,7 @@ plot_heatmap_clustered <- function(se, indicate = "condition", type = "centered"
   split <- p_heatmap_data %>% select(k, protein) %>% split.data.frame(.$k)
   split <- lapply(split, function(x) select(x,protein))
   
-  split_df <- do.call(gdata::cbindX, split)
+  split_df <- .cbind_pad(split)
   colnames(split_df) <- paste0("cluster_", 1:length(split))
   rownames(split_df) <- NULL
   

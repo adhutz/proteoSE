@@ -13,7 +13,6 @@
 #' @param file A file path to a GCT file. If provided, the function will parse the GCT data from the file. Default is an empty string.
 #' @return A long format data frame with columns for id.y, id.x, and metadata.
 #' 
-#' @importFrom cmapR parse_gctx melt_gct
 #' @importFrom tidyr pivot_longer pivot_wider
 #' @importFrom plyr colwise
 #' @importFrom dplyr filter
@@ -27,7 +26,8 @@
 #' }
 #' @export
 gct_to_long <- function(gct, file = ""){
-  
+  .require_pkg("cmapR", "read GCT files")
+
   if(!file == ""){
     gct <- cmapR::parse_gctx(file)
   }
@@ -64,7 +64,6 @@ gct_to_long <- function(gct, file = ""){
 #'   \item{"path"}{A character string indicating the path of the saved GCT file, if applicable.}
 #'   \item{"duplicated"}{A SummarizedExperiment object containing the duplicated rows removed from the input object.}
 #' }
-#' @importFrom cmapR write_gct
 #' @examples
 #' \dontrun{
 #' # Create a SummarizedExperiment object (se) here
@@ -74,8 +73,9 @@ gct_to_long <- function(gct, file = ""){
 #' }
 #' @export
 prep_ssgsea2 <- function(se, file = ""){
-  
-  
+  # cmapR defines the GCT S4 class used below; requireNamespace() loads it.
+  .require_pkg("cmapR", "build GCT objects")
+
   rid <- gsub("^.{8}(.*).{8}$", 
               "\\1-p", 
               rowData(se)$sequence_window)

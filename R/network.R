@@ -25,13 +25,13 @@
 #' @importFrom rbioapi rba_string_map_ids rba_string_interaction_partners rba_string_interactions_network
 #' @importFrom igraph graph_from_data_frame delete_vertices degree
 #' @importFrom cowplot plot_grid
-#' @import ggraph
 #'
 #' @return string network with integrated numeric values (fold-changes, lfq-values, ...)
 #' @export
 #'
 get_network <- function(genes, species = 9606, expression_data = NA, expand = FALSE, add_nodes = NA, network_type = "functional", score = 900, common_legend = FALSE, node_deg_above = NA){
-  
+  .require_pkg("ggraph", "draw STRING networks")
+
   # calculate min/max
   if(common_legend){
     min = min(expression_data[, -!is.numeric(expression_data)], na.rm = TRUE)
@@ -94,16 +94,16 @@ get_network <- function(genes, species = 9606, expression_data = NA, expand = FA
       max = max(expression_data[,i], na.rm = TRUE)
     }
     
-    ps[[i]] <- ggraph(g_obj, layout = "stress")+
-      geom_edge_link0(aes(edge_width = score), 
+    ps[[i]] <- ggraph::ggraph(g_obj, layout = "stress")+
+      ggraph::geom_edge_link0(aes(edge_width = score),
                       edge_colour="grey",
                       alpha=0.7) +
-      geom_node_point(aes_string(fill = i), 
+      ggraph::geom_node_point(aes_string(fill = i),
                       shape = 21, size=12) +
-      geom_node_text(aes(label = clean_name))+
-      scale_fill_gradient2(low = "blue", mid = "white", high = "red", 
+      ggraph::geom_node_text(aes(label = clean_name))+
+      scale_fill_gradient2(low = "blue", mid = "white", high = "red",
                            limits = c(min,max))+
-      scale_edge_width_continuous(range = c(0,1))+
+      ggraph::scale_edge_width_continuous(range = c(0,1))+
       theme_void()+
       labs(title = i)
   }

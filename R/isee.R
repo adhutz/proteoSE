@@ -12,13 +12,15 @@
 #'
 #' @return an iSEE app
 #' @importFrom iSEE iSEE RowDataTable
-#' @importFrom iSEEu VolcanoPlot FeatureSetTable
 #' @export
 isee_mini <- function(se) {
+  .require_pkg("iSEEu", "add the volcano and feature-set panels")
+
   gat <- GeneAnnoTable(PanelWidth = 8L)
   got <- GOTable(PanelWidth = 8L)
   rst <- RowDataTable(PanelWidth = 12L)
-  iSEE::iSEE(se, initial = list(got, rst, VolcanoPlot(PanelWidth = 6L), gat, FeatureSetTable(PanelWidth = 6L)))
+  iSEE::iSEE(se, initial = list(got, rst, iSEEu::VolcanoPlot(PanelWidth = 6L), gat,
+                                iSEEu::FeatureSetTable(PanelWidth = 6L)))
 }
 
 
@@ -63,15 +65,17 @@ make_mini <- function(se) {
 #'
 #' @return se summarized experiment with registered features
 #' @export
-#' @importFrom iSEEu registerFeatureSetCollections registerPValuePatterns registerLogFCPatterns
 #' @importFrom SingleCellExperiment reducedDims reducedDims<-
+#' @importFrom S4Vectors metadata
 #' @importFrom stats prcomp
 se_to_isee <- function(se, PValuePatterns = "p.val", LogFCPatterns = "_diff"){
+  .require_pkg("iSEEu", "register volcano and feature-set metadata")
+
   se <- as(se, "SingleCellExperiment")
 
   if("GO_enrichment" %in% names(metadata(se))){
   # Add GO-term enrichment as FeatureSet to allow plotting
-  se <- registerFeatureSetCollections(se, metadata(se)$GO_enrichment)
+  se <- iSEEu::registerFeatureSetCollections(se, metadata(se)$GO_enrichment)
   }
   
   if(!any(is.na(assay(se)))){
@@ -83,8 +87,8 @@ se_to_isee <- function(se, PValuePatterns = "p.val", LogFCPatterns = "_diff"){
   }
   
   #Register columns that contain p-values and log differences (for volcano mainly)
-  se<-registerPValuePatterns(se, PValuePatterns)
-  se<-registerLogFCPatterns(se, LogFCPatterns)
+  se<-iSEEu::registerPValuePatterns(se, PValuePatterns)
+  se<-iSEEu::registerLogFCPatterns(se, LogFCPatterns)
 
 }
 

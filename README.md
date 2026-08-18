@@ -30,6 +30,12 @@ if (!require("devtools", quietly = TRUE))
 devtools::install_github("adhutz/proteoSE")
 ```
 
+A few optional features sit behind `Suggests` and are only needed if you use them:
+`iSEEu` (volcano and feature-set panels), `ggraph` (STRING network plots), `cmapR`
+(GCT / ssGSEA export) and `waldo` (detailed data-frame diffs). The functions that
+need them say so and name the install command. To pull everything in up front, add
+`dependencies = TRUE` to the call above.
+
 ## Worked example
 [`docs/worked_example.Rmd`](docs/worked_example.Rmd) walks one fictional project all the
 way from a raw Spectronaut report to an interactive `iSEE` browser, with real figures

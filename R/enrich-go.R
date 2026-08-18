@@ -4,6 +4,23 @@
 # (see AUDIT.md). Function bodies are preserved verbatim from the original
 # main.R / mlasse.txt; renames and cleanup follow in later phases.
 
+# Named list of GO offspring/ancestor IDs for one ontology, straight from GO.db.
+# This is what GOSemSim:::getOffsprings()/getAncestors() do internally for
+# BP/CC/MF; calling them through ::: was the same trap as DOSE::parse_ratio
+# (an unexported symbol that can vanish on any upstream release).
+.go_relatives <- function(ont, what) {
+  map <- switch(
+    paste0(ont, what),
+    BPOFFSPRING = GO.db::GOBPOFFSPRING,
+    CCOFFSPRING = GO.db::GOCCOFFSPRING,
+    MFOFFSPRING = GO.db::GOMFOFFSPRING,
+    BPANCESTOR  = GO.db::GOBPANCESTOR,
+    CCANCESTOR  = GO.db::GOCCANCESTOR,
+    MFANCESTOR  = GO.db::GOMFANCESTOR,
+    stop("Unknown ontology '", ont, "'; expected one of BP, CC, MF.", call. = FALSE)
+  )
+  AnnotationDbi::as.list(map)
+}
 
 
 #' GO term enrichment
@@ -23,6 +40,7 @@
 #' @export
 #'
 #' @importFrom clusterProfiler simplify gseGO
+#' @importFrom S4Vectors metadata metadata<-
 enrich_go_se <- function(se, col_names =c(), simplify = TRUE, ont="all", keyType = "SYMBOL", OrgDb = "org.Hs.eg.db", pvalueCutoff = 1){
 
   tab_ <- rowData(se)%>%as.data.frame()
@@ -362,7 +380,7 @@ build_go_terms <- function(
   # -------------------------------------------------------------------------
   all_offsprings <- purrr::map_dfr(onts, function(ont) {
     .process_go_list(
-      go_list    = GOSemSim:::getOffsprings(ont = ont),
+      go_list    = .go_relatives(ont, "OFFSPRING"),
       count_col  = "n_children",
       string_col = "children",
       ont        = ont
@@ -373,7 +391,7 @@ build_go_terms <- function(
   # 2. Ancestors (parents): strip the synthetic root node "all" first
   # -------------------------------------------------------------------------
   all_ancestors <- purrr::map_dfr(onts, function(ont) {
-    go_list <- GOSemSim:::getAncestors(ont = ont)
+    go_list <- .go_relatives(ont, "ANCESTOR")
     go_list <- lapply(go_list, function(x) x[x != "all"])
     .process_go_list(
       go_list    = go_list,
