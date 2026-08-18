@@ -15,6 +15,7 @@
 #' @importFrom iSEEu VolcanoPlot FeatureSetTable
 #' @export
 isee_mini <- function(se) {
+  .assert_se(se)
   gat <- GeneAnnoTable(PanelWidth = 8L)
   got <- GOTable(PanelWidth = 8L)
   rst <- RowDataTable(PanelWidth = 12L)
@@ -67,6 +68,7 @@ make_mini <- function(se) {
 #' @importFrom SingleCellExperiment reducedDims reducedDims<-
 #' @importFrom stats prcomp
 se_to_isee <- function(se, PValuePatterns = "p.val", LogFCPatterns = "_diff"){
+  .assert_se(se)
   se <- as(se, "SingleCellExperiment")
 
   if("GO_enrichment" %in% names(metadata(se))){

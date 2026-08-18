@@ -203,7 +203,9 @@ plot_volcano <- function(
     target_color          = "#0072B2",
     label_colors          = c(Target = "#0072B2", Top = "black")
 ) {
-  
+  .assert_se(se, require_rowdata = id_col, require_contrast = contrast)
+
+
   # -------------------------------------------------------------------------
   # 0.  Resolve helper columns
   #     dedup_col:          column used to deduplicate the combined label data
@@ -751,6 +753,8 @@ plot_correlation <- function(df, x_column, y_column, label_names, gene_list = c(
 #' result$clusters
 #' }
 plot_heatmap_clustered <- function(se, indicate = "condition", type = "centered", k = 3, ...){
+  .assert_se(se, require_coldata = indicate)
+
   p_heatmap <- se %>% DEP2::plot_heatmap(indicate = indicate, type = type, kmeans = TRUE, k = k)  
 
   p_heatmap_data <- se %>% DEP2::plot_heatmap(indicate = indicate, type = type, kmeans = TRUE, k = k, plot = FALSE)  

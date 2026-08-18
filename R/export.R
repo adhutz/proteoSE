@@ -17,6 +17,8 @@
 #' @import dplyr
 #' @export
 write_phos <- function(se, file = ""){
+  .assert_se(se)
+
   exp <- se %>% 
     get_df_wide() %>%
     select(name,
@@ -56,6 +58,8 @@ write_phos <- function(se, file = ""){
 #' @import dplyr
 #' @export
 write_prot <- function(se, file = ""){
+  .assert_se(se)
+
   exp <- se %>% 
     get_df_wide() %>%
     select(name,

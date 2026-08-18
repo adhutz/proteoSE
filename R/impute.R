@@ -24,6 +24,7 @@
 #' @export
 #'
 impute_perseus = function(se, width = 0.3, downshift = 1.8, per_col=T) {
+  .assert_se(se, require_coldata = "condition")
 
 
   # 1. transform to long and set lfq_imputed = TRUE for all missing values
@@ -105,7 +106,8 @@ impute_perseus = function(se, width = 0.3, downshift = 1.8, per_col=T) {
 #'
 impute_DEP2 <- function(se, fun = c("bpca", "knn", "QRILC", "MLE", "MinDet", "MinProb",
                                "man", "min", "zero", "mixed", "nbavg"), ...){
-  
+  .assert_se(se)
+
   assays(se, withDimnames = FALSE)$imputed <- assay(se) %>% as.data.frame() %>% dplyr::mutate_all(~ ifelse(is.na(.x), 1,0)) %>% as.matrix()
   
   if(fun == "mixed"){

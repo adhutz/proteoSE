@@ -24,6 +24,8 @@
 #'
 #' @importFrom clusterProfiler simplify gseGO
 enrich_go_se <- function(se, col_names =c(), simplify = TRUE, ont="all", keyType = "SYMBOL", OrgDb = "org.Hs.eg.db", pvalueCutoff = 1){
+  .assert_se(se, require_rowdata = "gene_names",
+             require_contrast = if (length(col_names)) sub("_diff$", "", col_names) else NULL)
 
   tab_ <- rowData(se)%>%as.data.frame()
 
