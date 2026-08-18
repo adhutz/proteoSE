@@ -1,18 +1,41 @@
-# future.md — High-impact functionality to add to `sev`
+# future.md — High-impact functionality to add to `proteoSE`
 
-Forward-looking proposals for the *next* phase of `sev`, after the cleanup in `AUDIT.md` lands. Each item states **the problem**, **the proposal**, **why it's high-impact**, and a **sketch of the API with an example**. Ordered roughly by impact-to-effort.
+Forward-looking proposals for the *next* phase of `proteoSE`. Each item states **the
+problem**, **the proposal**, **why it's high-impact**, and a **sketch of the API with an
+example**. Ordered roughly by impact-to-effort.
 
-These are intentionally designed to fit the existing `SummarizedExperiment`-centric design, so they compose with the functions already in the package.
+These are intentionally designed to fit the existing `SummarizedExperiment`-centric
+design, so they compose with the functions already in the package.
+
+**Baseline as of 2026-08-17.** The refactor is done: the package is `proteoSE` 0.1.0
+(formerly `sev`, then `sev2`), 23 themed `R/*.R` files, ~90 exports, renamed functions
+carry `.Deprecated()` aliases in `R/deprecated.R`, 43 unit tests in `tests/testthat/`,
+GitHub Actions `R CMD check` on ubuntu/R-release, and `R CMD check` at 0 ERRORS /
+4 WARNINGS / 1 NOTE (vignettes ×2, `MSnbase`/`dplyr` namespace replacement, portable
+filename; the `:::` NOTE). Three vignettes exist plus a worked example
+(`docs/worked_example.Rmd`) driven by bundled Spectronaut example data
+(`inst/extdata/example_project_report.tsv` + `_conditions.tsv`). None of items 1–10
+below are implemented yet.
+
+Items marked **[plan]** have a dedicated implementation plan in `plans/` (local-only,
+gitignored). Items without one are proposals at the paragraph level.
 
 ---
 
-## 1. One-call QC report (`qc_report()`)
+## 1. One-call QC report (`qc_report()`) **[plan: `plans/qc-report.md`]**
 
-**Problem.** Every analysis starts with the same manual checks — missingness, per-sample CVs, intensity distributions, PCA, sample-correlation heatmap, ID counts. Right now users stitch these together by hand from scattered functions.
+**Problem.** Every analysis starts with the same manual checks — missingness, per-sample
+CVs, intensity distributions, PCA, sample-correlation heatmap, ID counts. Right now users
+stitch these together by hand from scattered functions; `docs/worked_example.Rmd` walks
+through exactly that sequence, one call at a time.
 
-**Proposal.** A single function that takes a `SummarizedExperiment` and renders a self-contained HTML QC report (parameterised R Markdown shipped in `inst/rmarkdown/`).
+**Proposal.** A single function that takes a `SummarizedExperiment` and renders a
+self-contained HTML QC report (parameterised R Markdown shipped in `inst/rmarkdown/`).
 
-**Why high-impact.** It's the first thing every user does, it catches bad samples before hours of downstream work, and it makes results shareable with non-R collaborators. Highest ROI of anything here.
+**Why high-impact.** It's the first thing every user does, it catches bad samples before
+hours of downstream work, and it makes results shareable with non-R collaborators.
+Highest ROI of anything here. It is also now cheap to build and demo: the bundled example
+project is a complete 4000 × 15 Spectronaut dataset with realistic MNAR missingness.
 
 ```r
 qc_report(se,
@@ -28,25 +51,41 @@ qc_report(se,
 #  - sample-sample correlation heatmap (flags swaps/outliers)
 ```
 
-Implementation reuses existing pieces (`clustered_heatmap`, `my_theme`, `add_randna`) inside an `.Rmd` template.
+Implementation is assembly, not new plotting: reuse `plot_heatmap_clustered()`,
+`theme_proteoSE()` and `add_randna()`, plus the DEP2 QC plots the worked example already
+exercises (`plot_numbers`, `plot_frequency`, `plot_missval`, `plot_detect`, `plot_pca`,
+`plot_cor`) inside one `.Rmd` template.
 
 ---
 
-## 2. Cache layer for all external API calls (`with_cache()`)
+## 2. Cache layer for all external API calls **[plan: `plans/api-cache.md`]**
 
-**Problem.** `get_network` (STRING), `genes_from_kegg` (KEGG), `find_kws`/`fetch_kw_accessions` (UniProt), `pubmed_query`, `scopus_query` all hit the network on every call. That makes them slow, flaky, rate-limited, and **untestable**.
+**Problem.** Six functions hit the network on every call:
 
-**Proposal.** A small on-disk memoisation layer (built on `memoise` + a `tools::R_user_dir("sev","cache")` directory). Wrap each network function once.
+| Function | File | Service |
+|---|---|---|
+| `get_network` | `R/network.R` | STRING (via `rbioapi`) |
+| `genes_from_kegg` | `R/enrich-go.R` | KEGG (`KEGGREST`) |
+| `find_kws`, `fetch_kw_accessions` | `R/uniprot.R` | UniProt (`uniprotREST`/`httr2`) |
+| `pubmed_query` | `R/literature.R` | NCBI E-utilities (`rentrez`) |
+| `scopus_query` | `R/literature.R` | Scopus |
 
-**Why high-impact.** Speeds up real analyses (re-runs are instant), removes the #1 source of CI flakiness, and is a prerequisite for testing the API functions properly (§8 of the audit).
+That makes them slow, flaky, rate-limited, and **untestable** — which is why none of them
+have a test today.
+
+**Proposal.** A small on-disk memoisation layer (`memoise` + `cachem::cache_disk()` in
+`tools::R_user_dir("proteoSE", "cache")`). Wrap each network function once.
+
+**Why high-impact.** Speeds up real analyses (re-runs are instant), removes the #1 source
+of CI flakiness, and is the prerequisite for testing these six functions at all.
 
 ```r
 # user-facing: identical call, now cached for 30 days
 net <- get_network(c("TP53","MDM2","CDKN1A"))   # first call: hits STRING
 net <- get_network(c("TP53","MDM2","CDKN1A"))   # second call: from cache
 
-sev_cache_clear()                 # housekeeping
-sev_cache_info()                  # size, entries, age
+proteoSE_cache_clear()            # housekeeping
+proteoSE_cache_info()             # size, entries, age
 ```
 
 Internally:
@@ -56,13 +95,18 @@ get_network <- with_cache(get_network_impl, ttl = 30 * 24 * 3600)
 
 ---
 
-## 3. SE structural validation (`validate_se()` / `.assert_se()`)
+## 3. SE structural validation (`validate_se()` / `.assert_se()`) **[plan: `plans/validate-se.md`]**
 
-**Problem.** Most functions assume specific `rowData` columns (`gene_names`, `_diff`, `p.val`, …) or assay names and fail deep inside with cryptic errors when those are missing.
+**Problem.** Most functions assume specific `rowData` columns (`gene_names`, `_diff`,
+`p.val`, …) or assay names and fail deep inside with cryptic errors when those are
+missing. This was flagged during the audit and never done.
 
-**Proposal.** A public `validate_se(se, require = c(...))` plus an internal `.assert_se()` used as a guard at the top of functions. Clear, early, actionable error messages.
+**Proposal.** A public `validate_se(se, require = c(...))` plus an internal `.assert_se()`
+used as a guard at the top of functions. Clear, early, actionable error messages.
 
-**Why high-impact.** Turns "Error in `[.data.frame`: undefined columns" into "`se` is missing rowData column `gene_names` (required by `plot_volcano`). Available: ...". Saves users (and you, in support) enormous time.
+**Why high-impact.** Turns "Error in `[.data.frame`: undefined columns" into "`se` is
+missing rowData column `gene_names` (required by `plot_volcano`). Available: ...". Saves
+users (and you, in support) enormous time.
 
 ```r
 validate_se(se, require_rowdata = c("gene_names"),
@@ -74,35 +118,51 @@ validate_se(se, require_rowdata = c("gene_names"),
 
 ---
 
-## 4. Unified import dispatcher (`read_proteomics()`)
+## 4. Unified import dispatcher (`read_proteomics()`) — **ON HOLD**
 
-**Problem.** Seven+ near-identical importers (`se_read_in`, `spectronaut_read_in`, `fragpipe_read_in`, `spectronaut_to_se`, `optimized_spectronaut_to_se`, `phos_read_in_*`). Users must know which to call; the cleaning logic is copy-pasted and drifts.
+**Status: deferred by the maintainer (2026-06-15), and still deferred.** The importers
+(`se_read_in`, `spectronaut_read_in`, `fragpipe_read_in`, `spectronaut_to_se`,
+`optimized_spectronaut_to_se`, `phos_read_in_int/occ`) are to be optimised by hand first;
+a dispatcher on top of code that is about to change is wasted work. Left here as a record
+of the idea, not as a queued task.
 
-**Proposal.** One entry point that detects or is told the source, delegating to a shared internal `.table_to_se()` core (this is audit §4c, surfaced here as the user-facing payoff).
-
-**Why high-impact.** One thing to learn, one place to fix bugs, consistent output regardless of search engine.
+**The original problem still stands.** Seven+ near-identical importers, users must know
+which to call, cleaning logic is copy-pasted and drifts. The eventual shape:
 
 ```r
 se <- read_proteomics("report.tsv",
                       source = "spectronaut",   # | "maxquant" | "fragpipe" | "diann"
                       type   = "protein",       # | "phospho"
                       design = "design.txt")
-
-# auto-detect from file contents when source is omitted:
-se <- read_proteomics("proteinGroups.txt")
 ```
 
-Adding DIA-NN support (currently absent, increasingly common) is a natural extension of the same dispatcher.
+**What changed in the meantime, and matters when this is picked up:**
+
+- `tests/testthat/test-import-proteomics.R` pins `se_read_in()`'s output on the real
+  MaxQuant example data — the golden characterisation test that makes the rewrite safe.
+- A Spectronaut fixture now ships too (`inst/extdata/example_project_report.tsv` +
+  `_conditions.tsv`, exercised end-to-end by `docs/worked_example.Rmd` via
+  `optimized_spectronaut_to_se()`), so a second characterisation test is now writable
+  without new sample files. FragPipe still has no fixture.
+- A WIP peptide-level QFeatures importer sits in `data-raw/spectronaut_to_qfeatures.R`
+  (local-only). It calls three helpers that were never written, so it errors if called.
+  Whoever unifies the importers should decide whether protein+peptide `QFeatures` output
+  belongs in the same dispatcher.
+- DIA-NN support is still absent and still increasingly common.
 
 ---
 
 ## 5. Standards-compliant export: SDRF / mzTab (`export_sdrf()`)
 
-**Problem.** Researchers increasingly must deposit data to PRIDE/ProteomeXchange, which expects SDRF sample metadata and mzTab results. `sev` already holds all of this in `colData`/`rowData`.
+**Problem.** Researchers increasingly must deposit data to PRIDE/ProteomeXchange, which
+expects SDRF sample metadata and mzTab results. `proteoSE` already holds all of this in
+`colData`/`rowData`.
 
-**Proposal.** `export_sdrf(se, file)` and `export_mztab(se, file)` that serialise the SE metadata into the community formats.
+**Proposal.** `export_sdrf(se, file)` and `export_mztab(se, file)` that serialise the SE
+metadata into the community formats.
 
-**Why high-impact.** Turns a painful, error-prone, manual deposition step into one line — a concrete reason for other labs to adopt the package.
+**Why high-impact.** Turns a painful, error-prone, manual deposition step into one line —
+a concrete reason for other labs to adopt the package.
 
 ```r
 export_sdrf(se, "experiment.sdrf.tsv")     # sample/condition/replicate/factor columns
@@ -111,19 +171,24 @@ export_mztab(se, "results.mztab")          # quant + differential results
 
 ---
 
-## 6. Reproducible pipeline object (`sev_pipeline()`)
+## 6. Reproducible pipeline object (`proteoSE_pipeline()`) **[plan: `plans/pipeline-object.md`]**
 
-**Problem.** Analyses are bespoke scripts; re-running with the same parameters and capturing provenance is manual. `save_session_report()` (in `mlasse`) is a start but isn't wired into a workflow.
+**Problem.** Analyses are bespoke scripts; re-running with the same parameters and
+capturing provenance is manual. `save_session_report()` (in `R/utils.R`) is a start but
+isn't wired into a workflow.
 
-**Proposal.** A lightweight, chainable pipeline that records each step and its parameters, runnable end-to-end and serialisable.
+**Proposal.** A lightweight, chainable pipeline that records each step and its parameters,
+runnable end-to-end and serialisable.
 
-**Why high-impact.** Reproducibility is the single biggest pain point in proteomics labs; a recorded, replayable pipeline plus an auto-generated methods paragraph is a major differentiator.
+**Why high-impact.** Reproducibility is the single biggest pain point in proteomics labs;
+a recorded, replayable pipeline plus an auto-generated methods paragraph is a major
+differentiator.
 
 ```r
-pipe <- sev_pipeline(read_proteomics("report.tsv", source = "spectronaut")) |>
+pipe <- proteoSE_pipeline(optimized_spectronaut_to_se(report, conditions)) |>
   step_filter(perc_na = 0.33) |>
-  step_impute(method = "MinProb") |>
-  step_test(contrast = "treat_vs_ctrl") |>
+  step_impute(method = "perseus") |>
+  step_test(contrast = "TreatA_vs_Ctrl") |>
   step_enrich_go()
 
 run(pipe)                          # executes, caches intermediates
@@ -131,33 +196,46 @@ write_methods(pipe, "methods.md")  # auto-generated methods text + package versi
 saveRDS(pipe, "analysis.rds")      # full provenance, re-runnable
 ```
 
-Could be backed by `targets` for the heavy lifting.
+**Sequencing.** This is the largest item and should come *after* 2 and 3 — its steps
+should wrap functions that already validate their inputs and cache their network calls.
+See the plan for the argument that the first version is a recorded call list, not
+`targets`.
 
 ---
 
 ## 7. Design-formula & contrast helpers (`make_design()` / `list_contrasts()`)
 
-**Problem.** `advanced_test`/`limma` require users to hand-build `model.matrix` and `makeContrasts` strings — a frequent error source (typos in contrast names produce silent nonsense).
+**Problem.** `test_diff_limma()` (formerly `advanced_test`) and `limma` require users to
+hand-build `model.matrix` and `makeContrasts` strings — a frequent error source (typos in
+contrast names produce silent nonsense).
 
-**Proposal.** Helpers that build the design from `colData` and enumerate/validate all pairwise (or specified) contrasts, with name checking.
+**Proposal.** Helpers that build the design from `colData` and enumerate/validate all
+pairwise (or specified) contrasts, with name checking.
 
-**Why high-impact.** Removes the most common statistical-setup mistake and makes the powerful `advanced_test` accessible to non-statisticians.
+**Why high-impact.** Removes the most common statistical-setup mistake and makes the
+powerful `test_diff_limma()` accessible to non-statisticians. Pairs naturally with item 3
+(same "tell the user what's actually available" error style).
 
 ```r
-design   <- make_design(se, ~ 0 + condition + batch)
+design    <- make_design(se, ~ 0 + condition + batch)
 contrasts <- list_contrasts(se, "condition")          # all pairwise, validated
-res      <- test_diff_limma(se, design, contrasts["treat_vs_ctrl"])
+res       <- test_diff_limma(se, design, contrasts["treat_vs_ctrl"])
 ```
 
 ---
 
 ## 8. Reactome / MSigDB enrichment + cached gene-set backends
 
-**Problem.** Enrichment is GO/KEGG-only (`se_GOE`, `genes_from_kegg`, `phospho_ora`). Reactome and MSigDB (hallmark, etc.) are heavily requested and not covered.
+**Problem.** Enrichment is GO/KEGG-only (`enrich_go_se`, `genes_from_kegg`,
+`phospho_ora`). Reactome and MSigDB (hallmark, etc.) are heavily requested and not
+covered.
 
-**Proposal.** `enrich_reactome(se)` and `enrich_msigdb(se, collection = "H")` mirroring the existing `se_GOE` interface (results into metadata, same downstream plotting), built on `ReactomePA`/`msigdbr` and sharing the §2 cache.
+**Proposal.** `enrich_reactome(se)` and `enrich_msigdb(se, collection = "H")` mirroring
+the existing `enrich_go_se()` interface (results into `metadata()`, same downstream
+plotting), built on `ReactomePA`/`msigdbr` and sharing the item-2 cache.
 
-**Why high-impact.** Broadens biological interpretation with near-zero new user-facing concepts (same pattern as existing GO enrichment).
+**Why high-impact.** Broadens biological interpretation with near-zero new user-facing
+concepts (same pattern as existing GO enrichment).
 
 ```r
 se <- enrich_reactome(se, contrast = "all")
@@ -165,15 +243,21 @@ se <- enrich_msigdb(se, collection = "H")   # hallmark gene sets
 # reuse existing plotting on the new metadata
 ```
 
+Note the dependency cost: `ReactomePA` and `msigdbr` are two more packages on an already
+heavy tree — declare them in **Suggests** with `requireNamespace()` guards (see item 11).
+
 ---
 
 ## 9. Power / sample-size planning (`estimate_power()`)
 
-**Problem.** `block_randomize` and `plan_experiment` help *schedule* an experiment but not *size* it. "How many replicates do I need?" is asked constantly.
+**Problem.** `block_randomize()` and `plan_experiment()` help *schedule* an experiment but
+not *size* it. "How many replicates do I need?" is asked constantly.
 
-**Proposal.** Given a pilot SE (or assumed CV and effect size), estimate detectable fold-change vs. replicate count, with a plot.
+**Proposal.** Given a pilot SE (or assumed CV and effect size), estimate detectable
+fold-change vs. replicate count, with a plot.
 
-**Why high-impact.** Moves the package upstream into experimental design — reviewers and grant applications increasingly demand power justification.
+**Why high-impact.** Moves the package upstream into experimental design — reviewers and
+grant applications increasingly demand power justification.
 
 ```r
 estimate_power(pilot_se,
@@ -184,24 +268,98 @@ estimate_power(pilot_se,
 
 ---
 
-## 10. Quality-of-life: progress, logging, and friendlier errors
+## 10. Quality-of-life: progress, logging, and friendlier errors **[plan: `plans/cli-progress.md`]**
 
-**Problem.** Long-running functions (imports, enrichment, network) are silent; failures are raw.
+**Problem.** Long-running functions (imports, enrichment, network) are silent; failures
+are raw.
 
-**Proposal.** Adopt `cli` for consistent progress bars, status messages, and structured errors across the package; a single `sev_verbose()` toggle.
+**Proposal.** Adopt `cli` for consistent progress bars, status messages, and structured
+errors across the package; a single verbosity toggle.
 
-**Why high-impact.** Cheap to add, dramatically improves perceived quality and debuggability — the difference between "feels like a tool" and "feels like a script dump."
+**Why high-impact.** Cheap to add, dramatically improves perceived quality and
+debuggability — the difference between "feels like a tool" and "feels like a script dump."
 
 ```r
-sev_options(verbose = TRUE)
-se <- read_proteomics("big_report.tsv", source = "spectronaut")
-#> ℹ Reading Spectronaut report (1.2M rows)...
-#> ✔ Parsed 8,432 protein groups across 24 samples [3.1s]
-#> ⚠ 312 rows dropped (contaminants/reverse)
+proteoSE_options(verbose = TRUE)
+se <- optimized_spectronaut_to_se(report, conditions)
+#> i Reading Spectronaut report (1.2M rows)...
+#> v Parsed 4,000 protein groups across 15 samples [3.1s]
+#> ! 312 rows dropped (contaminants/reverse)
 ```
+
+---
+
+## 11. Dependency slimming + install reliability **[plan: `plans/deps-and-install.md`]**
+
+**Problem.** `DESCRIPTION` declares **54 hard `Imports`** (against 18 `Suggests`),
+spanning CRAN, Bioconductor and two GitHub-only packages (`DEP2`, `uniprotREST`, declared
+in `Remotes:`). A new user's install has 54 ways to fail, and none of them can be
+reproduced on the maintainer's
+machine, where every package is already present. Three concrete defects are already
+confirmed by reading the source:
+
+- `org.Hs.eg.db`, `org.Mm.eg.db` and `GO.db` are called at runtime (`R/enrich-go.R`,
+  `R/isee-panels.R`) but appear in **neither `Imports` nor `Suggests`** — they only work
+  because they happen to be installed.
+- `DO.db` (needed by `DEP2`) is not declared anywhere; the README tells users to
+  `BiocManager::install()` it by hand.
+- Several `Imports` are used exactly once (`DescTools`, `IRanges`, `KEGGREST`,
+  `SingleCellExperiment`, `ggraph`, `tidyselect`) — a whole package pulled in for one
+  call.
+
+**Proposal.** (a) Verify the install empirically — CI already does a from-scratch
+dependency resolve, and a clean-library install locally reproduces a new user exactly;
+(b) declare the missing annotation packages; (c) move the optional/single-use ones to
+`Suggests` behind `requireNamespace()` guards, following the pattern already used in
+`R/utils.R` and `R/experiment-design.R`.
+
+**Why high-impact.** This is the difference between "I installed it" and "I gave up".
+Every other item on this list is worthless to a user who can't install the package.
+
+---
+
+## 12. pkgdown site **[plan: `plans/pkgdown-site.md`]**
+
+**Problem.** The documentation exists — three vignettes, a full worked example with 12
+real figures, an intro deck — but the only way to read it is to clone the repo or install
+the package. GitHub renders none of it usefully.
+
+**Proposal.** `_pkgdown.yml` (reference index grouped along the themed `R/` files,
+articles from the vignettes) plus a GitHub Pages workflow.
+
+**Why high-impact.** Cheap, and it turns work already done into something linkable from a
+paper, a lab wiki, or an email. Note the conflict to resolve first: `docs/` currently
+holds hand-made assets and pkgdown wants to own that directory.
+
+---
+
+## 13. Docs hygiene (small, do-now)
+
+Not "future" work so much as loose ends left by the rename and the repo cleanup:
+
+- `README.md` links to `docs/worked_example.md`, which was deleted from git and is now
+  gitignored — a broken link on the GitHub landing page.
+- `vignettes/worked_example.Rmd` is an untracked, pre-rename copy of
+  `docs/worked_example.Rmd`: it still says `library(sev2)` / `sev2::plot_volcano()`, calls
+  `get_df_wide()` (DEP2's, unqualified) and `impute_DEP()` (the export is `impute_DEP2`),
+  and has no `%\VignetteIndexEntry{}` header, so it is not buildable as a vignette.
+  Either fix and promote it, or delete it in favour of the `docs/` copy.
+
+See `plans/docs-hygiene.md`.
 
 ---
 
 ### Suggested order
 
-1, 2, and 3 first — they are foundational, low-risk, and make everything else (and the tests in `AUDIT.md`) easier. 4 and 8 build directly on existing code. 5, 6, 7, 9 are larger features to schedule once the core is clean and tested. 10 can be woven in continuously.
+1. **11 (deps/install)** and **13 (docs hygiene)** first — they are small, and they gate
+   whether anyone else can use the package at all.
+2. **1, 2, 3** next: the foundational trio. `qc_report()` is the biggest visible win, the
+   cache unblocks testing six untested functions, and `validate_se()` improves every
+   error message in the package.
+3. **12 (pkgdown)** once the vignettes are settled — it consumes them.
+4. **8** builds directly on `enrich_go_se()`; **7** on `test_diff_limma()`. Both are
+   contained, single-file additions.
+5. **5, 9** are standalone features, schedule on demand.
+6. **6 (pipeline)** last of the planned items — it should sit on top of 2 and 3.
+7. **10 (cli)** is woven in continuously rather than scheduled.
+8. **4 (importers)** stays on hold until the hand-optimisation happens.
