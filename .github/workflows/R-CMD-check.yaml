@@ -9,7 +9,7 @@
 # OS matrix; expand `config` if broader coverage is wanted.
 on:
   push:
-    branches: [main, master, v0.2]
+    branches: [main, master, v0.2, v0.3]
   pull_request:
     branches: [main, master]
 
