@@ -66,7 +66,8 @@ test_diff_limma <- function (se, design_formula = formula(~0 + condition), advan
                        fdr.type = c("Strimmer's qvalue(t)", "Strimmer's qvalue(p)", 
                                     "BH", "Storey's qvalue")) 
 {
-  
+  .assert_se(se, require_coldata = all.vars(design_formula))
+
   col_data <- colData(se)
   raw <- assay(se)
   

@@ -14,6 +14,7 @@
 #' @importFrom iSEE iSEE RowDataTable
 #' @export
 isee_mini <- function(se) {
+  .assert_se(se)
   .require_pkg("iSEEu", "add the volcano and feature-set panels")
 
   gat <- GeneAnnoTable(PanelWidth = 8L)
@@ -69,6 +70,7 @@ make_mini <- function(se) {
 #' @importFrom S4Vectors metadata
 #' @importFrom stats prcomp
 se_to_isee <- function(se, PValuePatterns = "p.val", LogFCPatterns = "_diff"){
+  .assert_se(se)
   .require_pkg("iSEEu", "register volcano and feature-set metadata")
 
   se <- as(se, "SingleCellExperiment")

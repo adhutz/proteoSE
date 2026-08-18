@@ -20,6 +20,7 @@
 #' @importFrom BiocGenerics unique
 #' @export
 filter_perseus<-function(se, perc_na = 0.33, filter_mode = "each_group"){
+  .assert_se(se, require_coldata = "condition")
 
   if(filter_mode %in% c("one_group", "each_group", "total")){
 
