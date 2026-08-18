@@ -24,17 +24,14 @@ if (!require("BiocManager", quietly = TRUE))
 if (!require("devtools", quietly = TRUE))
     install.packages("devtools")
     
-# DO.db is a Bioconductor annotation package, not a CRAN one.
-if (!require("DO.db", quietly = TRUE))
-    BiocManager::install("DO.db")
-
-# All other dependencies (CRAN, Bioconductor and the two GitHub-only packages
-# DEP2 and uniprotREST) are resolved automatically from DESCRIPTION.
+# All dependencies -- CRAN, Bioconductor, the org.Hs.eg.db / org.Mm.eg.db
+# annotation packages, and the two GitHub-only packages DEP2 and uniprotREST --
+# are resolved automatically from DESCRIPTION.
 devtools::install_github("adhutz/proteoSE")
 ```
 
 ## Worked example
-[`docs/worked_example.md`](docs/worked_example.md) walks one fictional project all the
+[`docs/worked_example.Rmd`](docs/worked_example.Rmd) walks one fictional project all the
 way from a raw Spectronaut report to an interactive `iSEE` browser, with real figures
 generated from the bundled example data. The companion slide deck
 `docs/proteoSE_pipeline_intro.pptx` introduces the `SummarizedExperiment` structure that

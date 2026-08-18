@@ -19,9 +19,10 @@ imported from.
 Three vignettes exist plus a worked example (`docs/worked_example.Rmd`) driven by bundled
 Spectronaut example data (`inst/extdata/example_project_report.tsv` + `_conditions.tsv`).
 
-**GitHub Actions had never once passed** — 13 runs, 13 failures, all on a stale
+**GitHub Actions had never once passed** until now — 13 runs, 13 failures, all on a stale
 `importFrom(DOSE, parse_ratio)` that made the package uninstallable anywhere a current
-DOSE is resolved. Fixed on the `v0.2` branch (`60c99fe`); see `plans/deps-and-install.md`
+DOSE is resolved. Fixed on the `v0.2` branch (`60c99fe`), and **CI runs 14 and 15 are green** — the first
+successful runs the repository has ever had. See `plans/deps-and-install.md`
 for the evidence trail and the technique for reading CI errors without `gh`. That failure
 is the strongest possible argument for item 11 below.
 
