@@ -53,6 +53,8 @@ Imports:
     magrittr,
     methods,
     MSnbase,
+    org.Hs.eg.db,
+    org.Mm.eg.db,
     patchwork,
     PhosR,
     plyr,

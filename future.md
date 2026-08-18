@@ -7,15 +7,25 @@ example**. Ordered roughly by impact-to-effort.
 These are intentionally designed to fit the existing `SummarizedExperiment`-centric
 design, so they compose with the functions already in the package.
 
-**Baseline as of 2026-08-17.** The refactor is done: the package is `proteoSE` 0.1.0
-(formerly `sev`, then `sev2`), 23 themed `R/*.R` files, ~90 exports, renamed functions
-carry `.Deprecated()` aliases in `R/deprecated.R`, 43 unit tests in `tests/testthat/`,
-GitHub Actions `R CMD check` on ubuntu/R-release, and `R CMD check` at 0 ERRORS /
-4 WARNINGS / 1 NOTE (vignettes ×2, `MSnbase`/`dplyr` namespace replacement, portable
-filename; the `:::` NOTE). Three vignettes exist plus a worked example
-(`docs/worked_example.Rmd`) driven by bundled Spectronaut example data
-(`inst/extdata/example_project_report.tsv` + `_conditions.tsv`). None of items 1–10
-below are implemented yet.
+**Baseline as of 2026-08-18** (measured, not remembered). The refactor is done: the
+package is `proteoSE` 0.1.0 (formerly `sev`, then `sev2`), 23 themed `R/*.R` files, ~90
+exports, renamed functions carry `.Deprecated()` aliases in `R/deprecated.R`, and
+`devtools::test()` is **60 passing / 0 failing**. `R CMD check` on the *tracked* tree with
+the CI workflow's own arguments gives **0 ERRORS / 2 WARNINGS / 1 NOTE** — both warnings
+are the un-built `inst/doc` vignettes; the note covers the `:::` calls into
+`GOSemSim`/`iSEE` plus the two org annotation packages, which are declared in
+`Imports` so they get installed but are referenced by name at runtime, never
+imported from.
+Three vignettes exist plus a worked example (`docs/worked_example.Rmd`) driven by bundled
+Spectronaut example data (`inst/extdata/example_project_report.tsv` + `_conditions.tsv`).
+
+**GitHub Actions had never once passed** — 13 runs, 13 failures, all on a stale
+`importFrom(DOSE, parse_ratio)` that made the package uninstallable anywhere a current
+DOSE is resolved. Fixed on the `v0.2` branch (`60c99fe`); see `plans/deps-and-install.md`
+for the evidence trail and the technique for reading CI errors without `gh`. That failure
+is the strongest possible argument for item 11 below.
+
+None of items 1-10 are implemented yet.
 
 Items marked **[plan]** have a dedicated implementation plan in `plans/` (local-only,
 gitignored). Items without one are proposals at the paragraph level.
@@ -291,21 +301,33 @@ se <- optimized_spectronaut_to_se(report, conditions)
 
 ## 11. Dependency slimming + install reliability **[plan: `plans/deps-and-install.md`]**
 
-**Problem.** `DESCRIPTION` declares **54 hard `Imports`** (against 18 `Suggests`),
+**Problem.** `DESCRIPTION` declares **55 hard `Imports`** (against 18 `Suggests`),
 spanning CRAN, Bioconductor and two GitHub-only packages (`DEP2`, `uniprotREST`, declared
-in `Remotes:`). A new user's install has 54 ways to fail, and none of them can be
-reproduced on the maintainer's
-machine, where every package is already present. Three concrete defects are already
-confirmed by reading the source:
+in `Remotes:`). A new user's install has 55 ways to fail, and none of them can be
+reproduced on the maintainer's machine, where every package is already present.
 
-- `org.Hs.eg.db`, `org.Mm.eg.db` and `GO.db` are called at runtime (`R/enrich-go.R`,
-  `R/isee-panels.R`) but appear in **neither `Imports` nor `Suggests`** — they only work
-  because they happen to be installed.
-- `DO.db` (needed by `DEP2`) is not declared anywhere; the README tells users to
-  `BiocManager::install()` it by hand.
-- Several `Imports` are used exactly once (`DescTools`, `IRanges`, `KEGGREST`,
-  `SingleCellExperiment`, `ggraph`, `tidyselect`) — a whole package pulled in for one
-  call.
+The empirical pass on 2026-08-18 (evidence trail in `plans/deps-and-install.md`) settled
+most of what this item was guessing at:
+
+- **The real failure mode was version drift, not unreachable repos.** A stale
+  `importFrom(DOSE, parse_ratio)` made the package uninstallable wherever a current DOSE
+  is resolved -- 13 CI runs, 13 failures, invisible locally because this machine holds
+  DOSE 4.2.0. Fixed in `60c99fe`, which removed `DOSE` from `Imports` entirely. **The
+  audit still worth doing is the rest of the `importFrom()` targets**, for the same class
+  of bug.
+- **Dependency *resolution* is healthy.** pak resolves CRAN + Bioconductor + both GitHub
+  remotes on a bare runner every time, and `HybridMTest` is not archived.
+- **`org.Hs.eg.db` / `org.Mm.eg.db` are now hard `Imports`** (`ac92684`). Every upstream
+  package that uses an org db declares it in *Suggests* only, so a fresh install reliably
+  ended up without one -- while clusterProfiler-based enrichment, which is most of what
+  users come here for, needs it. Cost: they are large, and `R CMD check` gains a cosmetic
+  "Namespaces in Imports field not imported from" NOTE because the OrgDb is passed as a
+  string. Accepted deliberately.
+- **`DO.db` is required by nothing** -- not one package in a fresh ~350-package tree
+  declares it (DOSE moved to `HDO.db`), so the README's manual install step is stale.
+- **Still true:** several `Imports` are used exactly once (`DescTools`, `IRanges`,
+  `KEGGREST`, `SingleCellExperiment`, `ggraph`, `tidyselect`) -- a whole package pulled in
+  for one call. That is what step 3 of the plan is for.
 
 **Proposal.** (a) Verify the install empirically — CI already does a from-scratch
 dependency resolve, and a clean-library install locally reproduces a new user exactly;
