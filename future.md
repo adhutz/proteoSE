@@ -106,7 +106,7 @@ get_network <- with_cache(get_network_impl, ttl = 30 * 24 * 3600)
 
 ---
 
-## 3. SE structural validation (`validate_se()` / `.assert_se()`) **[plan: `plans/validate-se.md`]**
+## 3. SE structural validation (`validate_se()` / `.assert_se()`) **[plan: `plans/validate-se.md`]** **[DONE]**
 
 **Problem.** Most functions assume specific `rowData` columns (`gene_names`, `_diff`,
 `p.val`, …) or assay names and fail deep inside with cryptic errors when those are
@@ -123,9 +123,19 @@ users (and you, in support) enormous time.
 validate_se(se, require_rowdata = c("gene_names"),
                 require_assays  = c("centered"),
                 require_contrast = "treat_vs_ctrl")
-#> Error: plot_volcano() needs a contrast 'treat_vs_ctrl'.
+#> Error: plot_volcano() needs a contrast treat_vs_ctrl.
 #>   rowData has _diff columns for: ctrl_vs_dmso, drugA_vs_dmso.
 ```
+
+**Done (branch `validate-se`).** `R/validate.R`: `validate_se()` exported, `.assert_se()`
+internal and filling in the calling function's name, one engine behind both. Additive
+optional requirements (`require_rowdata`, `require_coldata`, `require_assays`,
+`require_contrast`, `class`), returns `se` invisibly so the call composes. Guards are on
+the eleven user-facing entry points listed in the plan and nowhere else - internal
+functions that only ever receive an already-validated object get nothing. Requirements
+stay at what each function genuinely needs: an object missing `replicate` still plots
+fine, so nothing requires it. 17 tests in `tests/testthat/test-validate.R`, all asserting
+on the error *text*, since that is the whole feature.
 
 ---
 
