@@ -38,7 +38,9 @@
 #' @export
 phos_read_in_int <- function(file, gene_column = "gene_names", protein_column = "proteins", sep="_rep_", filt = c("reverse", "potential_contaminant"), keep_all_proteins = F, keep_all_genes = F, experimental_design = ""){
   
+  .msg("Reading {.file {file}}")
   data <- vroom::vroom(file, delim = "\t", col_names = T,guess_max = 30000,  .name_repair = janitor::make_clean_names)
+  .msg("{nrow(data)} rows, {ncol(data)} columns")
   
   #Split protein groups to single proteins, keep all
   data <- data %>%
@@ -82,6 +84,7 @@ phos_read_in_int <- function(file, gene_column = "gene_names", protein_column = 
   data_se <- DEP2::make_se(data_unique, which(colnames(data_unique) %in% gsub("intensity", "value",labels)), experimental_design)
   rownames(data_se) <- data_unique$name
   names(assays(data_se)) <- "intensity_raw"
+  .done("{nrow(data_se)} sites x {ncol(data_se)} samples")
   return(data_se)
 }
 
@@ -119,7 +122,9 @@ phos_read_in_int <- function(file, gene_column = "gene_names", protein_column = 
 #'@export
 phos_read_in_occ <- function(file, gene_column = "gene_names", protein_column = "proteins", sep="_rep_", filt = c("reverse", "potential_contaminant"), keep_all_proteins = F, keep_all_genes = F, experimental_design = ""){
   
+  .msg("Reading {.file {file}}")
   data <- vroom::vroom(file, delim = "\t", col_names = T,guess_max = 30000,  .name_repair = janitor::make_clean_names)
+  .msg("{nrow(data)} rows, {ncol(data)} columns")
   
   #Split protein groups to single proteins, keep all
   data <- data %>%
@@ -161,6 +166,7 @@ phos_read_in_occ <- function(file, gene_column = "gene_names", protein_column = 
   names(assays(data_se)) <- "occupancy"
   
   assay(data_se)[assay(data_se) == "NaN"] <- NA
+  .done("{nrow(data_se)} sites x {ncol(data_se)} samples")
   return(data_se)
 }
 
@@ -250,7 +256,9 @@ read_ptm_to_ppe <- function(file, source = c("maxquant", "spectronaut"), ...) {
 read_ptm_maxquant <- function(file, sep="_rep_",
                         filt = c("reverse", "potential_contaminant"), experimental_design = NA){
   
+  .msg("Reading {.file {file}}")
   data <- read.delim(file, sep="\t")
+  .msg("{nrow(data)} rows, {ncol(data)} columns")
   
   colnames(data) <- colnames(data) %>%
     tolower() %>%
@@ -320,6 +328,7 @@ read_ptm_maxquant <- function(file, sep="_rep_",
                            Localisation = as.numeric(data$localization_prob))
   
   rownames(ppe) <- paste(rowdata$protein_ids, rowdata$gene_names, paste0(rowdata$amino_acid, rowdata$positions_within_proteins), rowdata$sequence_window, sep = ";")
+  .done("{nrow(ppe)} sites x {ncol(ppe)} samples")
   return(ppe)
 }
 
@@ -452,6 +461,7 @@ read_ptm_spectronaut <- function(file, sep = "_rep_", filt = c("reverse", "poten
   
   # read in file
   if (is.character(file)) {
+    .msg("Reading {.file {file}}")
     data <- vroom::vroom(file, delim = "\t", col_names = TRUE, 
                          guess_max = 30000, .name_repair = janitor::make_clean_names)
   }
@@ -562,6 +572,7 @@ read_ptm_spectronaut <- function(file, sep = "_rep_", filt = c("reverse", "poten
                                   Residue = data$site_aa, Sequence = data$flanking_region, 
                                   UniprotID = data$protein_id, Localisation = as.numeric(data$max_prob_across_exp))
   rownames(ppe) <- rowdata$name
+  .done("{nrow(ppe)} sites x {ncol(ppe)} samples")
   if (output_type == "long_df") 
     return(DEP2::get_df_long(ppe))
   if (output_type == "wide_df") 

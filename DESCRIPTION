@@ -25,6 +25,7 @@ Imports:
     AnnotationDbi,
     assertthat,
     BiocGenerics,
+    cli,
     clusterProfiler,
     cowplot,
     DEP2,

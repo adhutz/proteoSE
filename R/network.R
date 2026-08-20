@@ -38,8 +38,11 @@ get_network <- function(genes, species = 9606, expression_data = NA, expand = FA
     max = max(expression_data[, -!is.numeric(expression_data)], na.rm = TRUE)
   } 
   
-  # map gene names to stringIDs 
+  # map gene names to stringIDs. get_network() is memoised (see R/zzz.R), so
+  # this body -- and these messages -- are skipped on a cache hit.
+  .msg("Mapping {length(genes)} gene{?s} to STRING IDs")
   prots <- genes %>% rbioapi::rba_string_map_ids(species=species)
+  .msg("Querying STRING for {network_type} interactions at score >= {score}")
   
   # If expand = TRUE, all interactions between input proteins and every other STRING protein are returned.
   # If expand = FALSE, interactions among the input set are retrieved. Additional proteins can be added via the add_nodes argument
@@ -66,6 +69,8 @@ get_network <- function(genes, species = 9606, expression_data = NA, expand = FA
          call. = FALSE)
   }
   
+  .done("{nrow(int_net)} interactions returned")
+
   # get stringIDs for all proteins of the expression table
   all_prots <- expression_data$gene_names %>% unlist() %>%
     rbioapi::rba_string_map_ids(species=species) %>% 

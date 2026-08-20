@@ -440,11 +440,8 @@ gse_filt <- function(
   n_input    <- dplyr::n_distinct(df$ID)
   n_survived <- dplyr::n_distinct(go_filtered$ID)
   
-  message(
-    "Input contained ", n_input, " unique GO terms.  ",
-    "After filtering, ", n_survived, " GO terms remain.\n",
-    "Any term significant in at least one cluster is retained for all clusters."
-  )
+  .msg("Input contained {n_input} unique GO terms; {n_survived} remain after filtering.")
+  .msg("Any term significant in at least one cluster is retained for all clusters.")
   
   # -------------------------------------------------------------------------
   # 5.  Expand filtered IDs back to all clusters.
@@ -587,7 +584,7 @@ reduce_terms <- function(gsea_res, ont = "all", terms) {
   # -------------------------------------------------------------------------
   n_rows_in         <- nrow(df)
   n_unique_terms_in <- dplyr::n_distinct(df$ID)
-  message(n_rows_in, " input rows with ", n_unique_terms_in, " unique input terms.")
+  .msg("{n_rows_in} input rows with {n_unique_terms_in} unique input terms.")
   
   # -------------------------------------------------------------------------
   # 4.  Core reduction logic
@@ -646,12 +643,8 @@ reduce_terms <- function(gsea_res, ont = "all", terms) {
   n_rows_out         <- nrow(df)
   n_unique_terms_out <- dplyr::n_distinct(df$ID)
   
-  message(
-    "Reduced to ", n_rows_out, " output rows with ",
-    n_unique_terms_out, " unique output terms.\n",
-    "Reduction kept the most specific GO term (leaf over branch); ",
-    "NES magnitude was not considered."
-  )
+  .msg("Reduced to {n_rows_out} output rows with {n_unique_terms_out} unique output terms.")
+  .msg("Kept the most specific GO term (leaf over branch); NES magnitude was not considered.")
   
   df
 }
@@ -830,9 +823,9 @@ select_diverse_terms <- function(
       )
     }
     df <- dplyr::left_join(df, terms, by = "ID")
-    message("Joined with terms data frame.")
+    .msg("Joined with terms data frame.")
   } else {
-    message("Terms already joined; skipping merge.")
+    .msg("Terms already joined; skipping merge.")
   }
   
   # -------------------------------------------------------------------------
@@ -850,7 +843,7 @@ select_diverse_terms <- function(
   df <- dplyr::filter(df, ONTOLOGY %in% ont)
   
   if (nrow(df) == 0) {
-    message("No terms passed the ontology filter.")
+    .msg("No terms passed the ontology filter.")
     return(df)
   }
   
@@ -912,15 +905,12 @@ select_diverse_terms <- function(
   # -------------------------------------------------------------------------
   if (keywords_only) {
     if (is.null(keep_keywords) || length(keep_keywords) == 0L) {
-      warning(
-        "keywords_only = TRUE but no keep_keywords supplied; ignoring.",
-        call. = FALSE
-      )
+      cli::cli_warn("{.arg keywords_only} is TRUE but no {.arg keep_keywords} supplied; ignoring.")
     } else {
-      message("keywords_only = TRUE: restricting to keyword-matched terms.")
+      .msg("{.arg keywords_only} is TRUE: restricting to keyword-matched terms.")
       df <- dplyr::filter(df, !is.na(keyword_match))
       if (nrow(df) == 0L) {
-        message("No keyword-matched terms found.")
+        .msg("No keyword-matched terms found.")
         return(df)
       }
     }
@@ -986,14 +976,11 @@ select_diverse_terms <- function(
     n_ont_present <- dplyr::n_distinct(df$ONTOLOGY)
     target_n      <- n_clusters * n_quantiles * n_per_stratum
     
-    message(
-      "Upsampling target: ", n_ont_present, " ontolog",
-      if (n_ont_present == 1L) "y" else "ies", " \u00d7 ",
-      n_clusters,  " cluster",  if (n_clusters  == 1L) "" else "s", " \u00d7 ",
-      n_quantiles, " quantile", if (n_quantiles  == 1L) "" else "s", " \u00d7 ",
-      n_per_stratum, " per stratum = ",
-      target_n, " unique IDs per ontology."
-    )
+    .msg(paste0(
+      "Upsampling target: {n_ont_present} ontolog{?y/ies} x ",
+      "{n_clusters} cluster{?s} x {n_quantiles} quantile{?s} x ",
+      "{n_per_stratum} per stratum = {target_n} unique IDs per ontology."
+    ))
     
     sel_unique <- dplyr::distinct(df_selected, ONTOLOGY, ID)
     
@@ -1047,18 +1034,17 @@ select_diverse_terms <- function(
     dplyr::distinct(ONTOLOGY, ID) |>
     dplyr::count(ONTOLOGY, name = "n_unique_ids")
   
-  message(
-    "Selected ", nrow(df_out), " rows total (", report_type, ").  ",
-    n_forced, " force-kept rows.  ",
-    "Unique IDs by ontology: ",
-    paste(
-      sprintf("%s=%d", id_counts$ONTOLOGY, id_counts$n_unique_ids),
-      collapse = ", "
-    ), "."
+  ont_summary <- paste(
+    sprintf("%s=%d", id_counts$ONTOLOGY, id_counts$n_unique_ids),
+    collapse = ", "
   )
+  .done(paste0(
+    "Selected {nrow(df_out)} rows total ({report_type}), {n_forced} force-kept. ",
+    "Unique IDs by ontology: {ont_summary}."
+  ))
   
   if (keywords_only)
-    message("Note: only keyword-matched terms were considered for selection.")
+    .msg("Only keyword-matched terms were considered for selection.")
   
   df_out
 }

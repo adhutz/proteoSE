@@ -61,7 +61,9 @@ enrich_go_se <- function(se, col_names =c(), simplify = TRUE, ont="all", keyType
     l<-sort(l, decreasing=TRUE)
 
     #Calculate GO-term enrichment
+    .msg("gseGO on {.val {comp_}} ({length(l)} genes)")
     temp <- clusterProfiler::gseGO(l, ont="all", keyType = "SYMBOL", OrgDb = OrgDb, pvalueCutoff = 1)
+    .msg("{nrow(temp)} enriched terms")
 
     #Reduce similar terms
 
@@ -74,7 +76,7 @@ enrich_go_se <- function(se, col_names =c(), simplify = TRUE, ont="all", keyType
         },
 
         error = function(e){
-          print("Not enough terms for reduction ")
+          cli::cli_warn("Term reduction skipped for {.val {comp_}}: {conditionMessage(e)}")
         }
 
       )
@@ -98,6 +100,7 @@ enrich_go_se <- function(se, col_names =c(), simplify = TRUE, ont="all", keyType
 
   }
 
+  .done("GO enrichment stored for {length(col_names)} contrast{?s}")
   return(se)
 }
 
@@ -151,7 +154,9 @@ phospho_ora <- function(se, contr = "all", OrgDb = "org.Hs.eg.db", pvalueCutoff 
   # Perform ORA via clusterProfiler for each contrast and ontology
   ora_res <- list()
   
+  .msg("ORA over {nrow(sign_genes)} contrast{?s}, {length(background)} background genes")
   for(ont_ in ont){
+    .msg("enrichGO {.field {ont_}}")
     ora_res[[ont_]] <- lapply(sign_genes$gene_names, 
                               clusterProfiler::enrichGO, 
                               OrgDb = OrgDb, 
@@ -248,7 +253,9 @@ genes_from_kegg <- function(keggpath_id = "hsa00190") {
   # KEGGREST, magrittr and dplyr are package Imports (see DESCRIPTION); no
   # runtime install/library() is needed.
 
-  # Fetching KEGG pathway data only once
+  # Fetching KEGG pathway data only once. This body is skipped entirely on a
+  # cache hit (see R/zzz.R), so the message doubles as "this was a live call".
+  .msg("Fetching KEGG pathway {.val {keggpath_id}}")
   pathway_data <- KEGGREST::keggGet(keggpath_id)[[1]]
   
   # Get human genes
