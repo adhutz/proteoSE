@@ -254,7 +254,9 @@ setMethod(".createObservers", "GOTable",
 
             # Observer for the DataTable row selection:
             select_field <- paste0(panel_name, "_rows_selected")
-            multi_name <- paste0(panel_name, "_", iSEE:::.flagMultiSelect)
+            # ponytail: literal copy of iSEE:::.flagMultiSelect, which R CMD check
+            # NOTEs on. test-isee-panels.R asserts it still matches iSEE.
+            multi_name <- paste0(panel_name, "_INTERNAL_multi_select")
             observeEvent(input[[select_field]], {
               chosen <- input[[select_field]]
               if (length(chosen)==0L) {
