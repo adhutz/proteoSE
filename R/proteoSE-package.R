@@ -11,6 +11,19 @@
 #' overview of the refactoring history and outstanding cleanup tasks, see
 #' `AUDIT.md` and `CHANGES_phase0-1.md` in the package root.
 #'
+#' @section Caching:
+#' The four functions that query an external API -- [get_network()] (STRING),
+#' [genes_from_kegg()] (KEGG), [find_kws()] and [fetch_kw_accessions()]
+#' (UniProt) -- are memoised on disk, so a repeated call with identical
+#' arguments is served from the cache instead of the network. Entries live in
+#' `tools::R_user_dir("proteoSE", "cache")`, expire after 30 days, and are
+#' pruned once the cache exceeds 512 MB. Use [proteoSE_cache_info()] to see the
+#' location and current size, and [proteoSE_cache_clear()] to empty it.
+#'
+#' Caching requires the suggested packages \pkg{memoise} and \pkg{cachem}; if
+#' either is missing the functions simply fetch every time. Set
+#' `options(proteoSE.cache = FALSE)` before loading the package to opt out.
+#'
 #' @section Namespace conflict policy:
 #' **dplyr wins every name collision.** Where another imported package exports a
 #' name dplyr also exports, dplyr's version is the one bound in the proteoSE

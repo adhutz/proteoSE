@@ -18,6 +18,21 @@ The package source is grouped by theme (see the file names in \verb{R/}). For an
 overview of the refactoring history and outstanding cleanup tasks, see
 \code{AUDIT.md} and \verb{CHANGES_phase0-1.md} in the package root.
 }
+\section{Caching}{
+
+The four functions that query an external API -- \code{\link[=get_network]{get_network()}} (STRING),
+\code{\link[=genes_from_kegg]{genes_from_kegg()}} (KEGG), \code{\link[=find_kws]{find_kws()}} and \code{\link[=fetch_kw_accessions]{fetch_kw_accessions()}}
+(UniProt) -- are memoised on disk, so a repeated call with identical
+arguments is served from the cache instead of the network. Entries live in
+\code{tools::R_user_dir("proteoSE", "cache")}, expire after 30 days, and are
+pruned once the cache exceeds 512 MB. Use \code{\link[=proteoSE_cache_info]{proteoSE_cache_info()}} to see the
+location and current size, and \code{\link[=proteoSE_cache_clear]{proteoSE_cache_clear()}} to empty it.
+
+Caching requires the suggested packages \pkg{memoise} and \pkg{cachem}; if
+either is missing the functions simply fetch every time. Set
+\code{options(proteoSE.cache = FALSE)} before loading the package to opt out.
+}
+
 \section{Namespace conflict policy}{
 
 \strong{dplyr wins every name collision.} Where another imported package exports a

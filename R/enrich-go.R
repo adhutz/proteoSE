@@ -239,6 +239,10 @@ phospho_ora <- function(se, contr = "all", OrgDb = "org.Hs.eg.db", pvalueCutoff 
 #' combined_df <- bind_rows(list_of_dataframes, .id = "keggpath_id")
 #' }
 #' @importFrom dplyr mutate
+# The importFrom is what keeps KEGGREST a visible dependency: genes_from_kegg()
+# is memoised at load (R/zzz.R), so the KEGGREST:: call below is no longer in the
+# namespace where 'R CMD check' looks for it.
+#' @importFrom KEGGREST keggGet
 #' @export
 genes_from_kegg <- function(keggpath_id = "hsa00190") {
   # KEGGREST, magrittr and dplyr are package Imports (see DESCRIPTION); no
