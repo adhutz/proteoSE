@@ -535,6 +535,7 @@ build_go_terms <- function(
 #' @importFrom AnnotationDbi keys
 #' @importFrom dplyr filter left_join select
 #' @importFrom janitor clean_names
+#' @importFrom org.Hs.eg.db org.Hs.eg.db
 #'
 #' @export
 get_go_terms <- function(

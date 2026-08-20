@@ -76,3 +76,25 @@ test_that("add_significance respects a stricter diff threshold", {
   rd  <- SummarizedExperiment::rowData(se2)
   expect_equal(rd$cond_vs_ctrl_significant, c(FALSE, FALSE, TRUE))
 })
+
+test_that("add_randna() works without fdrtool attached", {
+  # HybridMTest reaches fdrtool::gcmlcm() through the search path only, so
+  # add_randna() used to fail with "could not find function 'gcmlcm'" in any
+  # session that had not run library(fdrtool).
+  skip_if_not_installed("HybridMTest")
+  skip_if("package:fdrtool" %in% search(), "fdrtool already attached")
+
+  se <- make_test_se(n_features = 300, replicates = 4)
+  a <- SummarizedExperiment::assay(se)
+  set.seed(2)
+  a[sample(length(a), 600)] <- NA
+  SummarizedExperiment::assay(se) <- a
+
+  # HybridMTest's own grenander step warns on small/degenerate p-value sets;
+  # that is not what this test is about.
+  out <- suppressWarnings(add_randna(se))
+  expect_type(SummarizedExperiment::rowData(out)$randna, "logical")
+  expect_length(SummarizedExperiment::rowData(out)$randna, nrow(se))
+  # and it puts the search path back the way it found it
+  expect_false("package:fdrtool" %in% search())
+})

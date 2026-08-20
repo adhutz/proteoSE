@@ -112,7 +112,6 @@ utils::globalVariables(c(
   "number_of_na",
   "observeEvent",
   "ontology",
-  "org.Hs.eg.db",
   "organisms",
   "orig_gene_names",
   "orig_prot_ids",
