@@ -24,6 +24,17 @@
 #' either is missing the functions simply fetch every time. Set
 #' `options(proteoSE.cache = FALSE)` before loading the package to opt out.
 #'
+#' @section Progress messages:
+#' Import, enrichment and network functions report what they are doing while
+#' they run. The messages are on at an interactive prompt and off everywhere
+#' else -- scripts, `knitr`, `R CMD check` -- so nothing prints where it would
+#' only be noise. Override with [proteoSE_verbose()], or set
+#' `options(proteoSE.verbose = TRUE/FALSE)` directly.
+#'
+#' Because the four cached functions above are memoised, their bodies do not
+#' run on a cache hit; the absence of a "Fetching ..." message is how you tell
+#' a cached answer from a live one.
+#'
 #' @section Namespace conflict policy:
 #' **dplyr wins every name collision.** Where another imported package exports a
 #' name dplyr also exports, dplyr's version is the one bound in the proteoSE

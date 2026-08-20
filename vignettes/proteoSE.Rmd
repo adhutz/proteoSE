@@ -88,7 +88,7 @@ Now that rows with too many missing values are excluded, we can replace NAs with
 
 ### Possibility 1: Use DEP standard functions
 ```{r impute DEP}
-se_imp <- proteoSE::impute_DEP(se_filtered, fun="QRILC")
+se_imp <- proteoSE::impute_DEP2(se_filtered, fun="QRILC")
 ```
 
 ### Possibility 2: Use mixed imputation for **MAR** vs. **MNAR**
@@ -97,7 +97,7 @@ It is possible to distinguish different types of "missingness", termed either **
 ```{r}
 se_randna <- proteoSE::add_randna(se_filtered)
 
-se_imp <- proteoSE::impute_DEP(se_randna, randna = rowData(se_randna)$randna, fun = "mixed", mar = "knn", mnar = "QRILC")
+se_imp <- proteoSE::impute_DEP2(se_randna, fun = "mixed", mar = "knn", mnar = "QRILC")
 ```
 
 ### Possibility 3: Use Perseus method

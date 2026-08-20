@@ -37,10 +37,10 @@ need them say so and name the install command. To pull everything in up front, a
 `dependencies = TRUE` to the call above.
 
 ## Worked example
-[`docs/worked_example.Rmd`](docs/worked_example.Rmd) walks one fictional project all the
+[`vignettes/articles/worked_example.Rmd`](vignettes/articles/worked_example.Rmd) walks one fictional project all the
 way from a raw Spectronaut report to an interactive `iSEE` browser, with real figures
 generated from the bundled example data. The companion slide deck
-`docs/proteoSE_pipeline_intro.pptx` introduces the `SummarizedExperiment` structure that
+`pkgdown/assets/proteoSE_pipeline_intro.pptx` introduces the `SummarizedExperiment` structure that
 every step reads from and writes to.
 
 ## View vignette

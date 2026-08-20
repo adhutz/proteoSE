@@ -19,3 +19,6 @@
 ^docs$
 ^~\$
 ^CLAUDE\.local\.md$
+^_pkgdown\.yml$
+^pkgdown$
+^vignettes/articles$

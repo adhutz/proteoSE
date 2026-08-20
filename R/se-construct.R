@@ -108,10 +108,19 @@ merge_se <- function(se = list(), keep_all = FALSE){
 #'
 #' @return se with added rowData column
 #' @importFrom HybridMTest row.oneway.anova
-#' @importFrom fdrtool gcmlcm
 #' @export
 add_randna <- function(se){
-  
+
+  # HybridMTest:::grenander() calls gcmlcm() unqualified and finds it only on
+  # the search path: fdrtool is in HybridMTest's Depends, and Depends are not
+  # attached when we merely load its namespace. An @importFrom into proteoSE
+  # does not help -- the lookup happens in HybridMTest's frame -- so attach
+  # fdrtool for the duration of the call.
+  if (!"package:fdrtool" %in% search()) {
+    attachNamespace("fdrtool")
+    on.exit(detach("package:fdrtool"), add = TRUE)
+  }
+
   # replace na with 0, values with 1
   dummy <- as.matrix(ifelse(is.na(assay(se)), 0,1))
   

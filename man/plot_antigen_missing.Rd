@@ -38,7 +38,13 @@ The function calculates missing and measured data percentages, applies quantile-
 \examples{
 \dontrun{
 # Assuming `se` is a `SummarizedExperiment` object with relevant data:
-plot_antigen_missing(se, test_condition = "test_cond", ctrl_condition = "control_cond", quantile = 0.05, perc_low_ctrl = 70)
+plot_antigen_missing(
+  se,
+  test_condition = "test_cond",
+  ctrl_condition = "control_cond",
+  quantile       = 0.05,
+  perc_low_ctrl  = 70
+)
 
 }
 }

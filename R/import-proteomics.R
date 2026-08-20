@@ -34,7 +34,9 @@ se_read_in <- function(file, gene_column = "gene_names", protein_column = "prote
                        filt = c("reverse", "only_identified_by_site", "potential_contaminant"), keep_all_proteins = F, keep_all_genes = F, experimental_design = ""){
 
   #ProteinGroups
+  .msg("Reading {.file {file}}")
   data <- read.delim(file, sep="\t")
+  .msg("{nrow(data)} rows, {ncol(data)} columns")
 
   colnames(data) <- colnames(data) %>%
     tolower() %>%
@@ -49,7 +51,9 @@ se_read_in <- function(file, gene_column = "gene_names", protein_column = "prote
     dplyr::rename("perseus_intensity" = "intensity")
 
   #Filter false and low quality hits
+  n_before <- nrow(data)
   data <- data %>% filter(if_all(filt, ~ .x == ""))
+  .msg("Dropped {n_before - nrow(data)} rows matching {.field {filt}}")
   
   #Make gene_names unique
   data_unique <- make_unique(data, gene_column, protein_column, delim=";")
@@ -66,9 +70,11 @@ se_read_in <- function(file, gene_column = "gene_names", protein_column = "prote
     LFQ_labels<-experimental_design$label
   }
 
+  .msg("{length(LFQ_labels)} samples in {length(unique(experimental_design$condition))} conditions")
   data_se <- make_se(data_unique, which(colnames(data_unique) %in% LFQ_labels), experimental_design)
   rownames(data_se) <- data_unique$name
   names(assays(data_se)) <- "lfq_raw"
+  .done("{nrow(data_se)} protein groups x {ncol(data_se)} samples")
   return(data_se)
 }
 
@@ -101,6 +107,7 @@ se_read_in <- function(file, gene_column = "gene_names", protein_column = "prote
 
 spectronaut_read_in <- function(file, gene_column = "genes", protein_column = "uni_prot_ids", sep="_rep_", keep_all_proteins = F, keep_all_genes = F, experimental_design = ""){
   
+  .msg("Reading {.file {file}}")
   #####read in data (spectronaut output from Fatih Demir)
   df <- vroom::vroom(file, delim = "\t", col_names = T,guess_max = 30000,  .name_repair = janitor::make_clean_names) %>% #https://www.rdocumentation.org/packages/readxl/versions/1.3.1/topics/cell-specification
     rename_all(tolower) %>% #turn all column names to lower case (makes it easier for later code writing)
@@ -152,9 +159,11 @@ spectronaut_read_in <- function(file, gene_column = "genes", protein_column = "u
     LFQ_labels<-experimental_design$label
   }
   
+  .msg("{length(LFQ_labels)} samples in {length(unique(experimental_design$condition))} conditions")
   data_se <- make_se(data, which(colnames(data) %in% LFQ_labels), experimental_design)
   rownames(data_se) <- data$name
   names(assays(data_se)) <- "lfq_raw"
+  .done("{nrow(data_se)} protein groups x {ncol(data_se)} samples")
   return(data_se)
 }
 
@@ -185,6 +194,7 @@ spectronaut_read_in <- function(file, gene_column = "genes", protein_column = "u
 
 fragpipe_read_in <- function(file, gene_column = "gene", protein_column = "protein_id", sep="_rep_", experimental_design = ""){
   
+  .msg("Reading {.file {file}}")
   #####read in data (spectronaut output from Fatih Demir)
   df <- vroom::vroom(file, delim = "\t", col_names = T,guess_max = 30000,  .name_repair = janitor::make_clean_names) %>% #https://www.rdocumentation.org/packages/readxl/versions/1.3.1/topics/cell-specification
     rename_all(tolower) %>% #turn all column names to lower case (makes it easier for later code writing)
@@ -208,9 +218,11 @@ fragpipe_read_in <- function(file, gene_column = "gene", protein_column = "prote
     LFQ_labels<-experimental_design$label
   }
   
+  .msg("{length(LFQ_labels)} samples in {length(unique(experimental_design$condition))} conditions")
   data_se <- make_se(data, which(colnames(data) %in% LFQ_labels), experimental_design)
   rownames(data_se) <- data$name
   names(assays(data_se)) <- "lfq_raw"
+  .done("{nrow(data_se)} protein groups x {ncol(data_se)} samples")
   return(data_se)
 }
 
@@ -530,6 +542,7 @@ optimized_spectronaut_to_se <- function(candidates = NULL, report = NULL, contra
   
   # Add 'sample' column for compatibility with proteoSE filtering functions
   colData(se)$sample <- colData(se)$ID
+  .done("{nrow(se)} protein groups x {ncol(se)} samples")
   
   # Return the SE object
   return(se)

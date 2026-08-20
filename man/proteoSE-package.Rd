@@ -33,6 +33,19 @@ either is missing the functions simply fetch every time. Set
 \code{options(proteoSE.cache = FALSE)} before loading the package to opt out.
 }
 
+\section{Progress messages}{
+
+Import, enrichment and network functions report what they are doing while
+they run. The messages are on at an interactive prompt and off everywhere
+else -- scripts, \code{knitr}, \verb{R CMD check} -- so nothing prints where it would
+only be noise. Override with \code{\link[=proteoSE_verbose]{proteoSE_verbose()}}, or set
+\code{options(proteoSE.verbose = TRUE/FALSE)} directly.
+
+Because the four cached functions above are memoised, their bodies do not
+run on a cache hit; the absence of a "Fetching ..." message is how you tell
+a cached answer from a live one.
+}
+
 \section{Namespace conflict policy}{
 
 \strong{dplyr wins every name collision.} Where another imported package exports a
@@ -55,6 +68,7 @@ through this namespace, so a bare \code{select()} there means \code{dplyr::selec
 Useful links:
 \itemize{
   \item \url{https://github.com/adhutz/proteoSE}
+  \item \url{https://adhutz.github.io/proteoSE/}
   \item Report bugs at \url{https://github.com/adhutz/proteoSE/issues}
 }
 

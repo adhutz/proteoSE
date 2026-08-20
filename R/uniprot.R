@@ -57,6 +57,7 @@ find_kws <- function(terms, limit = 20) {
   # -------------------------------------------------------------------------
   # 1.  Query the API for each term and flatten into a single data frame
   # -------------------------------------------------------------------------
+  .msg("Searching UniProt keywords for {length(terms)} term{?s}")
   results <- purrr::map_dfr(terms, function(term) {
     
     kw_hits <- httr2::request(kw_search_url) |>
@@ -80,6 +81,13 @@ find_kws <- function(terms, limit = 20) {
     })
   })
   
+  # No hits at all leaves a 0-column tibble, and the group_by() below would
+  # then fail with "object 'id' not found" instead of saying what went wrong.
+  if (nrow(results) == 0) {
+    cli::cli_abort("No UniProt keywords matched {.val {terms}}.")
+  }
+  .done("{nrow(results)} keyword hit{?s}")
+
   # -------------------------------------------------------------------------
   # 2.  Collapse duplicate keyword IDs
   #     A keyword may be returned by more than one query term; merge those
@@ -144,7 +152,13 @@ fetch_kw_accessions <- function(
   # -------------------------------------------------------------------------
   # 1.  Fetch and clean results for a single keyword row
   # -------------------------------------------------------------------------
+  # One slow UniProtKB query per keyword, so a progress bar earns its keep here.
+  bar <- if (.verbose()) {
+    cli::cli_progress_bar("Fetching UniProt accessions", total = nrow(keywords))
+  }
+
   .fetch_one <- function(id_val, label_val) {
+    if (!is.null(bar)) cli::cli_progress_update(id = bar)
     uniprotREST::uniprot_search(
       query    = sprintf(
         "(proteome:%s) AND (keyword:%s) AND (reviewed:true)",
@@ -172,6 +186,7 @@ fetch_kw_accessions <- function(
     .fetch_one
   ) |>
     purrr::set_names(keywords$label)
+  if (!is.null(bar)) cli::cli_progress_done(id = bar)
   
   # -------------------------------------------------------------------------
   # 3.  Optionally flatten to a gene-keyword annotation tibble
