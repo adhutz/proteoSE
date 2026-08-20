@@ -217,10 +217,11 @@ phospho_ora <- function(se, contr = "all", OrgDb = "org.Hs.eg.db", pvalueCutoff 
 #' @examples
 #' \dontrun{
 #' genes_from_kegg("hsa00190")
-#' oxphos <- genes_from_kegg(keggpath_id = "hsa00190")  # default, or specify another pathway ID https://www.kegg.jp/entry/map00190
-#' cellcycle <- genes_from_kegg(keggpath_id = "hsa04110") #https://www.genome.jp/pathway/map04110
-#' mtor <- genes_from_kegg(keggpath_id = "hsa04150") #https://www.kegg.jp/pathway/map=map04150
-#' ampk <- genes_from_kegg(keggpath_id = "hsa04152") #https://www.kegg.jp/pathway/map=map04152
+#' # Pathway IDs are the map numbers at https://www.kegg.jp/entry/
+#' oxphos    <- genes_from_kegg(keggpath_id = "hsa00190")  # default
+#' cellcycle <- genes_from_kegg(keggpath_id = "hsa04110")
+#' mtor      <- genes_from_kegg(keggpath_id = "hsa04150")
+#' ampk      <- genes_from_kegg(keggpath_id = "hsa04152")
 #' print(cellcycle)
 #' 
 #' 

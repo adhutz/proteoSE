@@ -107,7 +107,13 @@ plot_antigen <- function(se, contrast, additional_sets = "none", scale = FALSE, 
 #' @examples
 #' \dontrun{
 #' # Assuming `se` is a `SummarizedExperiment` object with relevant data:
-#' plot_antigen_missing(se, test_condition = "test_cond", ctrl_condition = "control_cond", quantile = 0.05, perc_low_ctrl = 70)
+#' plot_antigen_missing(
+#'   se,
+#'   test_condition = "test_cond",
+#'   ctrl_condition = "control_cond",
+#'   quantile       = 0.05,
+#'   perc_low_ctrl  = 70
+#' )
 #'
 #' }
 #' @importFrom dplyr filter mutate group_by ungroup summarize_all summarize left_join

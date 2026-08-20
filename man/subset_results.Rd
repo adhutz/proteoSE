@@ -50,6 +50,12 @@ df <- data.frame(
 )
 
 # Subset the dataframe with conditions and contrasts
-subset_results(df, id_col = "name", condition_list = c("cond1"), contrast_list = c("contrastA"), extra_cols = c("col2"))
+subset_results(
+  df,
+  id_col        = "name",
+  condition_list = c("cond1"),
+  contrast_list  = c("contrastA"),
+  extra_cols     = c("col2")
+)
 
 }

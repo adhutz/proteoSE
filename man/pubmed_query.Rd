@@ -65,16 +65,23 @@ pubmed_query(keywords1 = c("itaconate", "macrophage"))
 pubmed_query(
   #date_range = c("2020", "3000"),
   years_back = 5,
-  keywords1 = c("itaconate", "itaconylation", "itaconatylation", "itaconation","itaconic acid"),
-  keywords2 = c("proteomics", "metabolomics", "PTM", "proteome", "metabolite", "metabolome", "modification"),
+  keywords1 = c("itaconate", "itaconylation", "itaconatylation",
+                "itaconation", "itaconic acid"),
+  keywords2 = c("proteomics", "metabolomics", "PTM", "proteome",
+                "metabolite", "metabolome", "modification"),
   operator = "AND",
   authors = c("Rinschen MM", "Smith AB"),
   author_position = "first_last",
-  high_impact_journals = c("Nature", "Nat Metab", "Nature Immunology", "Nature Medicine", "Nature Communications", "Nat Rev Immunol", 
-                           "Cell", "Cell Metab", "Cell Reports", "BMJ", "Annu Rev Pathol", "Annu Rev Immunol", "Trends Endocrinol Metab", "Metabolism",
-                           "Science", "Science Immunology", "Science Translational Medicine",
-                           "Signal Transduct Target Ther", "Immunity", "J Clin Invest", "EMBO J", "Proc Natl Acad Sci U S A",
-                           "J Am Soc Nephrol", "Kidney Int", "N Engl J Med", "Circulation", "Nat Rev Nephrol"),
+  high_impact_journals = c(
+    "Nature", "Nat Metab", "Nature Immunology", "Nature Medicine",
+    "Nature Communications", "Nat Rev Immunol", "Cell", "Cell Metab",
+    "Cell Reports", "BMJ", "Annu Rev Pathol", "Annu Rev Immunol",
+    "Trends Endocrinol Metab", "Metabolism", "Science",
+    "Science Immunology", "Science Translational Medicine",
+    "Signal Transduct Target Ther", "Immunity", "J Clin Invest",
+    "EMBO J", "Proc Natl Acad Sci U S A", "J Am Soc Nephrol",
+    "Kidney Int", "N Engl J Med", "Circulation", "Nat Rev Nephrol"
+  ),
   pmid_ctrl = c(40011782, 37271942),
   open_in_browser = T
 )
