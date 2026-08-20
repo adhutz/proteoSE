@@ -1,0 +1,151 @@
+---
+title: "proteoSE QC report"
+date: "`r format(Sys.time(), '%Y-%m-%d %H:%M')`"
+output:
+  html_document:
+    self_contained: true
+    theme: readable
+    toc: true
+    toc_float: true
+params:
+  se: NULL
+  group: "condition"
+  batch: NULL
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      results = "asis", fig.width = 8, fig.height = 5,
+                      fig.align = "center")
+
+se       <- params$se
+group    <- params$group
+batch    <- params$batch
+indicate <- intersect(c(group, batch, "replicate"),
+                      colnames(SummarizedExperiment::colData(se)))
+
+# Degrade, don't fail. A panel whose prerequisite is missing says so in one
+# line and the report carries on. ggplots are returned and must be printed;
+# the ComplexHeatmap/gridExtra panels (plot_missval, plot_detect, plot_cor)
+# draw themselves and must not be printed twice.
+panel <- function(expr) {
+  tryCatch({
+    p <- expr
+    if (inherits(p, "ggplot")) print(p)
+  }, error = function(e) {
+    cat("\n*Not available:* ", conditionMessage(e), "\n\n", sep = "")
+  })
+  invisible(NULL)
+}
+```
+
+## Overview
+
+```{r overview}
+mat <- SummarizedExperiment::assay(se)
+cat("| | |\n|---|---|\n",
+    "| Features | ", nrow(se), " |\n",
+    "| Samples | ", ncol(se), " |\n",
+    "| Assays | ", paste(SummarizedExperiment::assayNames(se), collapse = ", "), " |\n",
+    "| Reported assay | ", SummarizedExperiment::assayNames(se)[1], " |\n",
+    "| Missing values | ", sprintf("%.1f%%", 100 * mean(is.na(mat))), " |\n",
+    "| Complete features | ", sum(stats::complete.cases(mat)), " |\n",
+    sep = "")
+```
+
+### Design
+
+```{r design}
+print(knitr::kable(as.data.frame(SummarizedExperiment::colData(se))))
+```
+
+## Identifications
+
+How many features each run saw. A sample well below its neighbours is a run
+that underperformed, not a biological result.
+
+```{r numbers}
+panel(DEP2::plot_numbers(se))
+```
+
+How complete the matrix is: features binned by the number of samples they were
+detected in.
+
+```{r frequency}
+panel(DEP2::plot_frequency(se))
+```
+
+```{r coverage}
+panel(DEP2::plot_coverage(se))
+```
+
+## Missing values
+
+Where the missingness sits, and whether it looks random. Black is a measured
+value, white a missing one.
+
+```{r missval, fig.height = 6}
+panel(DEP2::plot_missval(se))
+```
+
+Intensity of fully observed features against those with missing values. If the
+features with gaps are systematically the low-intensity ones, the missingness is
+MNAR and imputation must account for that.
+
+```{r detect, fig.height = 7}
+panel(DEP2::plot_detect(se))
+```
+
+```{r randna}
+randna <- tryCatch(
+  SummarizedExperiment::rowData(proteoSE::add_randna(se))$randna,
+  error = function(e) NULL
+)
+if (is.null(randna)) {
+  cat("*MAR/MNAR classification not available.*\n")
+} else {
+  cat(sprintf(
+    "`add_randna()` calls %d of %d features missing at random (MAR) and %d missing not at random (MNAR).\n",
+    sum(randna), length(randna), sum(!randna)))
+}
+```
+
+## Intensity distributions
+
+Per-sample distributions. These should be comparable across samples before any
+differential test; if they are not, normalise first.
+
+```{r normalization, fig.height = 6}
+panel(DEP2::plot_normalization(se))
+```
+
+## Replicate variability
+
+Coefficient of variation within each condition. A condition with a visibly
+wider spread has a replicate problem.
+
+```{r cvs, fig.height = 6}
+panel(DEP2::plot_cvs(se))
+```
+
+## Sample relationships
+
+Do the samples group the way the design says they should? The correlation
+panel needs a complete matrix -- on a raw assay it will say so; re-run with
+`assay = ` set to an imputed assay to see it.
+
+```{r pca}
+panel(DEP2::plot_pca(se, indicate = indicate, n = min(500, nrow(se))))
+```
+
+```{r cor, fig.height = 6}
+panel(DEP2::plot_cor(se, significant = FALSE, indicate = indicate))
+```
+
+---
+
+```{r session}
+cat("<details><summary>Session info</summary>\n\n```\n")
+print(utils::sessionInfo())
+cat("\n```\n</details>\n")
+```
