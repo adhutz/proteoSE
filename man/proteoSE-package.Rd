@@ -68,6 +68,7 @@ through this namespace, so a bare \code{select()} there means \code{dplyr::selec
 Useful links:
 \itemize{
   \item \url{https://github.com/adhutz/proteoSE}
+  \item \url{https://adhutz.github.io/proteoSE/}
   \item Report bugs at \url{https://github.com/adhutz/proteoSE/issues}
 }
 

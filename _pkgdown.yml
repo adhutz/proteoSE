@@ -1,0 +1,150 @@
+url: https://adhutz.github.io/proteoSE/
+
+template:
+  bootstrap: 5
+
+articles:
+- title: Get started
+  navbar: ~
+  contents:
+  - proteoSE
+  - Phosphoproteome_analysis
+- title: Worked example
+  contents:
+  - articles/worked_example
+
+reference:
+- title: Import
+  desc: >
+    Read search-engine output (MaxQuant, Spectronaut, FragPipe) into a
+    SummarizedExperiment or PhosphoExperiment.
+  contents:
+  - se_read_in
+  - spectronaut_read_in
+  - fragpipe_read_in
+  - spectronaut_to_se
+  - optimized_spectronaut_to_se
+  - fix_maxquant_pig_annotation
+  - phos_read_in_int
+  - phos_read_in_occ
+  - read_ptm_to_ppe
+  - aggregate_phospho
+  - censor_by_peptide_count
+
+- title: SE construction and accessors
+  desc: Build, extend, reshape and check the object everything else operates on.
+  contents:
+  - merge_se
+  - add_assay
+  - add_stats
+  - add_significance
+  - add_randna
+  - log2fc_to_fc
+  - get_coldata
+  - get_rowdata
+  - get_df_wide_append_assay
+  - se_modify
+  - se_to_long
+  - validate_se
+
+- title: Filtering and imputation
+  contents:
+  - filter_perseus
+  - condition_impute
+  - impute_DEP2
+  - impute_perseus
+  - impute_seeded
+
+- title: Differential testing
+  contents:
+  - test_diff_limma
+  - test_diff_long
+  - combine_limma_outputs
+  - rm_batch
+  - subset_results
+
+- title: Enrichment
+  desc: GO over-representation and GSEA, plus the term wrangling around them.
+  contents:
+  - enrich_go_se
+  - phospho_ora
+  - build_go_terms
+  - get_go_terms
+  - genes_from_kegg
+  - shorten_terms
+  - prep_gse
+  - gse_filt
+  - reduce_terms
+  - select_diverse_terms
+  - prep_ksea
+  - prep_ssgsea2
+  - gct_to_long
+
+- title: Phosphoproteomics
+  desc: Kinase-substrate scoring and signalome analysis via PhosR.
+  contents:
+  - prep_phosR
+  - prep_phosR_from_ppe
+  - norm_ptm
+  - aov_scale_phosR
+  - test_diff_phosR
+  - plot_signalome_map
+  - module_barplot
+
+- title: Networks and literature
+  contents:
+  - get_network
+  - find_kws
+  - fetch_kw_accessions
+  - pubmed_query
+  - scopus_query
+
+- title: Plotting
+  contents:
+  - plot_volcano
+  - plot_heatmap_clustered
+  - plot_correlation
+  - plot_scatter
+  - plot_2D_scatter
+  - plot_antigen
+  - plot_antigen_missing
+  - plot_individuals
+  - plot_overlap
+  - theme_proteoSE
+  - to_pdf
+  - flatten_plot_points
+  - save_flattened_plot
+
+- title: Reports and export
+  contents:
+  - qc_report
+  - write_prot
+  - write_phos
+  - prep_ipath3
+
+- title: Experiment design
+  contents:
+  - plan_experiment
+  - block_randomize
+
+- title: Interactive browsing
+  contents:
+  - se_to_isee
+  - isee_mini
+  - make_mini
+  - run_dep_lfq_app
+
+- title: Options and cache
+  contents:
+  - proteoSE_verbose
+  - proteoSE_cache_info
+  - proteoSE_cache_clear
+
+- title: Utilities
+  contents:
+  - split_genes
+  - extract_by_protein_id
+  - clean_values_colwise
+  - center_substring
+  - compare_dataframes_full
+  - save_session_report

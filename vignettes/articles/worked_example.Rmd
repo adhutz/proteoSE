@@ -16,7 +16,7 @@ output:
 
 This walkthrough takes one made-up project from raw search-engine output all the way to an interactive results browser, using nothing but `proteoSE` and the Bioconductor packages it builds on. Every step shows the code you would run, the console output it produces, and — where a picture helps — a real figure generated from the bundled example data.
 
-> New to Bioconductor or the `SummarizedExperiment` class? Skim the companion slide deck (`docs/proteoSE_pipeline_intro.pptx`) first — it explains the one data structure that every step below reads from and writes to.
+> New to Bioconductor or the `SummarizedExperiment` class? Skim the companion slide deck (`pkgdown/assets/proteoSE_pipeline_intro.pptx`) first — it explains the one data structure that every step below reads from and writes to.
 >
 > The figures on this page are produced by `data-raw/make_worked_example_figures.R`; re-run it to regenerate them.
 

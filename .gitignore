@@ -24,8 +24,8 @@ data-raw/test_run.log
 /HANDOVER.md
 /CHANGES_phase0-1.md
 /plans/
-/docs/worked_example.md
-/docs/superpowers/
+# pkgdown output; track it only if the site is published from docs/
+/docs/
 
 # Oversized example input, not needed to build or check
 /inst/extdata/example_2_Phospho_STY_Sites.txt
