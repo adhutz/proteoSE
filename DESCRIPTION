@@ -84,6 +84,7 @@ Suggests:
     DT,
     ggraph,
     ggrastr,
+    ggseqlogo,
     iSEEu,
     knitr,
     memoise,
@@ -97,6 +98,7 @@ Suggests:
     shiny,
     shinydashboard,
     testthat (>= 3.0.0),
+    UpSetR,
     waldo
 Config/testthat/edition: 3
 Config/Needs/website: pkgdown

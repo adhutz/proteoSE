@@ -11,13 +11,17 @@
 /experiment_design.xlsx
 /r_session_info/
 /check_out.txt
+/Rplots.pdf
 data-raw/test_run.log
 
 # RStudio project file (machine-specific)
 *.Rproj
 
 # Data-prep and legacy scripts: kept locally, not part of the package
-/data-raw/
+/data-raw/*
+# ... except the generator for the shipped synthetic example, which has to be
+# reproducible. .Rbuildignore keeps data-raw/ out of the tarball either way.
+!/data-raw/make_phospho_example.R
 
 # Working notes, superseded by docs/ and the vignette
 /AUDIT.md
@@ -27,7 +31,8 @@ data-raw/test_run.log
 # pkgdown output; track it only if the site is published from docs/
 /docs/
 
-# Oversized example input, not needed to build or check
+# Real measured data: never pushed. The phospho vignette runs on the synthetic
+# inst/extdata/example_phospho_sites.txt instead.
 /inst/extdata/example_2_Phospho_STY_Sites.txt
 
 # Private Claude Code notes

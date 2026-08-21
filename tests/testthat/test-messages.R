@@ -44,11 +44,19 @@ test_that("instrumented functions are silent when verbose is off", {
 })
 
 test_that("find_kws() says so when nothing matched", {
-  # Real UniProt call: useful locally, not worth a flaky CI failure.
+  # This needs a real UniProt call -- the guard sits after the request, so there
+  # is nothing to assert on offline. skip_if_offline() only proves the machine
+  # has a route, not that the API answered, so treat any transport failure as a
+  # skip rather than letting a timeout fail R CMD check.
   skip_on_ci()
   skip_if_offline()
-  expect_error(
-    find_kws("zzzzznotakeyword"),
-    "No UniProt keywords matched"
+
+  res <- tryCatch(find_kws("zzzzznotakeyword"), error = function(e) e)
+  skip_if(
+    inherits(res, "error") &&
+      grepl("HTTP request|[Tt]imeout|curl|resolve", conditionMessage(res)),
+    "UniProt did not answer"
   )
+  expect_s3_class(res, "error")
+  expect_match(conditionMessage(res), "No UniProt keywords matched")
 })

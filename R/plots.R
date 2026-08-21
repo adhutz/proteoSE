@@ -771,8 +771,10 @@ plot_heatmap_clustered <- function(se, indicate = "condition", type = "centered"
 
   p_heatmap_data <- se %>% DEP2::plot_heatmap(indicate = indicate, type = type, kmeans = TRUE, k = k, plot = FALSE)  
   
-  split <- p_heatmap_data %>% select(k, protein) %>% split.data.frame(.$k)
-  split <- lapply(split, function(x) select(x,protein))
+  # DEP2::plot_heatmap(plot = FALSE) names the feature column `name`; DEP (v1),
+  # which this was written against, called it `protein`.
+  split <- p_heatmap_data %>% select(k, name) %>% split.data.frame(.$k)
+  split <- lapply(split, function(x) select(x, name))
   
   split_df <- .cbind_pad(split)
   colnames(split_df) <- paste0("cluster_", 1:length(split))

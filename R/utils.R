@@ -463,3 +463,29 @@ extract_by_protein_id <- function(df,
   return(result)
 }
 
+
+
+#' Long-format data frame with a predictable intensity column
+#'
+#' \code{DEP2::get_df_long()} merges rowData with the melted assay, so a rowData
+#' column named \code{intensity} collides with the assay values and both come
+#' back suffixed (\code{intensity.x} / \code{intensity.y}). Every MaxQuant
+#' phospho table has such a column -- \code{se_read_in()} renames it to
+#' \code{perseus_intensity} on the proteome side, the phospho importers do not --
+#' which made \code{filter_perseus()} and \code{impute_perseus()} fail on
+#' phospho data with "object 'intensity' not found".
+#'
+#' Dropping the rowData copy before melting keeps the assay column named
+#' \code{intensity} whatever the input looks like.
+#'
+#' @param se A SummarizedExperiment.
+#' @return The long data frame from \code{DEP2::get_df_long()}.
+#' @noRd
+.se_long <- function(se) {
+  rd <- SummarizedExperiment::rowData(se)
+  if ("intensity" %in% colnames(rd)) {
+    SummarizedExperiment::rowData(se) <-
+      rd[, setdiff(colnames(rd), "intensity"), drop = FALSE]
+  }
+  DEP2::get_df_long(se)
+}

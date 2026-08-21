@@ -20,9 +20,14 @@ make_test_se <- function(n_features = 10, conditions = c("ctrl", "treat"),
     condition = samples$condition,
     replicate = samples$replicate
   )
+  # `ID` on colData and `name`/`ID` on rowData are what the real importers
+  # produce, and what DEP2::get_df_long() requires.
+  col_data$ID <- col_data$sample
   row_data <- S4Vectors::DataFrame(
     gene_names  = paste0("G", seq_len(n_features)),
-    protein_ids = rownames(mat)
+    protein_ids = rownames(mat),
+    name        = rownames(mat),
+    ID          = rownames(mat)
   )
   SummarizedExperiment::SummarizedExperiment(
     assays  = list(intensity = mat),
