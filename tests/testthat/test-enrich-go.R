@@ -44,3 +44,13 @@ test_that("enrich_go_se() says so when nothing has a gene symbol", {
     "No usable gene symbols"
   )
 })
+
+# Both defaults are bare package objects. They resolve only through a real
+# @importFrom: listing them in globalVariables() silences the check NOTE
+# without making the lookup work, which is how `ontology_db = GO.db` stayed
+# broken until a vignette render hit it.
+test_that("get_go_terms() default annotation databases resolve", {
+  ns <- environment(get_go_terms)
+  expect_s4_class(eval(formals(get_go_terms)$organism_db, ns), "OrgDb")
+  expect_s4_class(eval(formals(get_go_terms)$ontology_db, ns), "GODb")
+})

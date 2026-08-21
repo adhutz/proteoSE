@@ -19,7 +19,6 @@ utils::globalVariables(c(
   "FC",
   "FoldEnrichment",
   "GO",
-  "GO.db",
   "Gene",
   "GeneRatio",
   "HTML",
