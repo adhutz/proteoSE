@@ -42,7 +42,7 @@ get_rowdata <- function(se) {
 #' It allows the user to specify the assays to include in the output data frame.
 #'
 #' @param se A SummarizedExperiment object.
-#' @param assays_ A character vector of assay names to include in the output data frame. Default is an empty character vector, which selects all assays.
+#' @param assays_ A character vector of assay names to include in the output data frame. Default is `NULL`, which selects all assays.
 #' @return A data frame in long format with assay values, rowData, and colData combined.
 #' @importFrom dplyr filter
 #' @importFrom tidyr pivot_longer
@@ -55,8 +55,8 @@ get_rowdata <- function(se) {
 #' result_all <- se_to_long(se)
 #' }
 #' @export
-se_to_long <- function(se, assays_ = c("")){
-  
+se_to_long <- function(se, assays_ = NULL){
+
   if(length(assays_) == 0){
     assays_ <- names(assays(se)) 
   }
@@ -65,9 +65,12 @@ se_to_long <- function(se, assays_ = c("")){
   
   df <- do.call("cbind", df) %>% cbind(as.data.frame(rowData(se)))
   
-  assays <- grep(paste(assays_, "\\.", sep = ""), colnames(df), value = TRUE) %>% gsub("\\..*","",.) %>% unique()
-  
-  df_ <- df %>% dplyr::select(-ID) %>% tidyr::pivot_longer(grep(paste(assays_,"\\.", sep = ""), colnames(df), value = TRUE), names_to = c("assays", "ID"), names_pattern = "(.*)\\.(.*)")
+  # One pattern for all the selected assays: paste()ing per assay gives grep() a
+  # vector, and grep() silently uses only its first element.
+  value_cols <- grep(paste0("^(", paste(assays_, collapse = "|"), ")\\."),
+                     colnames(df), value = TRUE)
+
+  df_ <- df %>% dplyr::select(-ID) %>% tidyr::pivot_longer(dplyr::all_of(value_cols), names_to = c("assays", "ID"), names_pattern = "(.*)\\.(.*)")
   
   df_ <- merge(df_, as.data.frame(colData(se)), by.x = "ID")
   #%>% tidyr::pivot_longer(paste0("assay_",names(assays(se))))
