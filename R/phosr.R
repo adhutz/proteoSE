@@ -30,7 +30,8 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @export
 prep_phosR <- function(se, species = "human", numMotif = 5, numSub = 1, top = 30){
-  
+  species <- match.arg(species, c("human", "mouse", "rat"))
+
   # Load PhosphoSitePlus into the function frame, not globalenv (R CMD check NOTEs on the latter).
   # KinaseFamily is unused here and kinaseSubstrateScore() loads KinaseMotifs
   # itself, so PhosphoSitePlus is the only set we need.
@@ -47,17 +48,9 @@ prep_phosR <- function(se, species = "human", numMotif = 5, numSub = 1, top = 30
   rownames(mat) <- gsub("(.*;.*;).*","\\1",rownames(mat))
   colnames(mat) <- se$ID
     
-  if(species == "human"){
-    psite = PhosphoSite.human
-  } else if(species == "mouse"){
-    psite = PhosphoSite.mouse
-  } else if(species == "rat"){
-    psite = PhosphoSite.mouse
-  } else{
-    return("Species must be one of human, mouse or rat")
-  }
-  
-  kss <- kinaseSubstrateScore(psite, mat, seq,numMotif = numMotif, numSub = numSub, species = "human")
+  psite <- get(paste0("PhosphoSite.", species))
+
+  kss <- kinaseSubstrateScore(psite, mat, seq,numMotif = numMotif, numSub = numSub, species = species)
   set.seed(1)
   ksp <- kinaseSubstratePred(kss, top=top)
   
@@ -167,7 +160,8 @@ module_barplot <- function(mat, signalome_res){
 #' @importFrom RColorBrewer brewer.pal
 #' @export
 prep_phosR_from_ppe <- function(ppe, species = "human", numMotif = 5, numSub = 1, top = 30, assay = "z_scored"){
-  
+  species <- match.arg(species, c("human", "mouse", "rat"))
+
   # Load PhosphoSitePlus into the function frame, not globalenv (R CMD check NOTEs on the latter).
   # KinaseFamily is unused here and kinaseSubstrateScore() loads KinaseMotifs
   # itself, so PhosphoSitePlus is the only set we need.
@@ -181,17 +175,9 @@ prep_phosR_from_ppe <- function(ppe, species = "human", numMotif = 5, numSub = 1
   rownames(mat) <- gsub(".*;(.*;.*;).*","\\1",rownames(mat))
   colnames(mat) <- ppe$ID
   
-  if(species == "human"){
-    psite = PhosphoSite.human
-  } else if(species == "mouse"){
-    psite = PhosphoSite.mouse
-  } else if(species == "rat"){
-    psite = PhosphoSite.rat
-  } else{
-    return("Species must be one of human, mouse or rat")
-  }
-  
-  kss <- kinaseSubstrateScore(psite, mat, seq, numMotif = numMotif, numSub = numSub, species = "human")
+  psite <- get(paste0("PhosphoSite.", species))
+
+  kss <- kinaseSubstrateScore(psite, mat, seq, numMotif = numMotif, numSub = numSub, species = species)
   set.seed(1)
   ksp <- kinaseSubstratePred(kss, top=top)
   
