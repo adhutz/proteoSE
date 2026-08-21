@@ -95,8 +95,8 @@ plot_antigen <- function(se, contrast, additional_sets = "none", scale = FALSE, 
 #' This function creates a detailed plot to visualize missing data patterns, highlighting the percentage of missing data in test and control conditions. It also allows for the labeling of specific targets.
 #'
 #' @param se A `SummarizedExperiment` object containing the data to be analyzed.
-#' @param test_condition A string specifying the test condition to analyze. Defaults to `"lcm_igan"`.
-#' @param ctrl_condition A string specifying the control condition to compare against. Defaults to `"lcm_ctrl"`.
+#' @param test_condition A string naming the test condition to analyze.
+#' @param ctrl_condition A string naming the control condition to compare against.
 #' @param quantile A numeric value indicating the quantile cutoff for low intensity in the control condition. Defaults to `0.1`.
 #' @param perc_low_ctrl A numeric threshold for filtering antigens based on the percentage of low-intensity measurements in the control condition. Defaults to `80`.
 #' @param targets A data frame with `name` and `target` columns to highlight specific targets. Defaults to an empty data frame.
@@ -122,7 +122,7 @@ plot_antigen <- function(se, contrast, additional_sets = "none", scale = FALSE, 
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom forcats fct_rev
 #' @export
-plot_antigen_missing <- function(se, test_condition = "lcm_igan", ctrl_condition = "lcm_ctrl", 
+plot_antigen_missing <- function(se, test_condition, ctrl_condition, 
                                  quantile = 0.1, perc_low_ctrl = 80, targets = data.frame(name = character(0), target = character(0))){
   
   df_long <- DEP2::get_df_long(se[, se$condition %in% c(test_condition, ctrl_condition)]) %>% select(name, condition, intensity, label, replicate)
@@ -173,42 +173,42 @@ plot_antigen_missing <- function(se, test_condition = "lcm_igan", ctrl_condition
                                    breaks = c(0, 80, 99, 100), 
                                    labels = c("0-80 %", "80-99 %", "100 %"), 
                                    include.lowest = TRUE, include.highest = TRUE)) %>%
-    mutate(perc_miss_igan_cut = cut(perc_miss_test_condition, 
+    mutate(perc_miss_test_cut = cut(perc_miss_test_condition, 
                                     breaks = c(0, 10, 30, 50, 100), 
                                     labels = c("0-10 %", "10-30 %", "30-50 %", "50-100 %"), 
                                     include.lowest = TRUE))%>%
-    mutate(perc_meas_igan_cut = cut(perc_meas_test_condition, 
+    mutate(perc_meas_test_cut = cut(perc_meas_test_condition, 
                                     breaks = c(0, 30, 50, 70, 90, 100), 
                                     labels = c("0-30 %", "30-50 %", "50-70 %", "70-90 %", "90-100 %"), 
                                     include.lowest = TRUE)) %>%
     mutate(perc_miss_ctrl_cut = forcats::fct_rev(factor(perc_miss_ctrl_cut, levels = c("0-70 %","70-80 %", "80-99 %", "100 %"))),
            perc_low_ctrl_cut = forcats::fct_rev(factor(perc_low_ctrl_cut, levels = c("0-80 %", "80-99 %", "100 %"))),
-           perc_miss_igan_cut = factor(perc_miss_igan_cut, levels = c("0-10 %", "10-30 %", "30-50 %", "50-100 %")),
-           perc_meas_igan_cut = factor(perc_meas_igan_cut, levels = c("0-30 %", "30-50 %", "50-70 %", "70-90 %", "90-100 %"))) %>% 
+           perc_miss_test_cut = factor(perc_miss_test_cut, levels = c("0-10 %", "10-30 %", "30-50 %", "50-100 %")),
+           perc_meas_test_cut = factor(perc_meas_test_cut, levels = c("0-30 %", "30-50 %", "50-70 %", "70-90 %", "90-100 %"))) %>% 
     dplyr::left_join(targets, by = "name") 
   
   set.seed(1)
   
   if(nrow(targets) == 0){
     p_final <- df_final  %>% 
-      #filter(perc_meas_igan > 30) %>%
+      #filter(perc_meas_test_condition > 30) %>%
       ggplot(aes(x = x_coord, y = mean_test_condition, fill = perc_miss_ctrl_cut)) +
       geom_point(shape = 21, size = 3)+
       scale_fill_brewer(palette = "OrRd", direction = -1) +
       ggrepel::geom_text_repel(aes(label = name), min.segment.length = 0, max.overlaps = 10) +
-      facet_grid(perc_low_ctrl_cut ~ perc_meas_igan_cut, scales = "free") +
+      facet_grid(perc_low_ctrl_cut ~ perc_meas_test_cut, scales = "free") +
       labs(fill = paste0("Percent missing in ", ctrl_condition), y = paste0("Mean(Intensity) in ", test_condition), x = "") +
       theme_proteoSE() +
       theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
   } else{
     p_final <- df_final  %>% 
-      #filter(perc_meas_igan > 30) %>%
+      #filter(perc_meas_test_condition > 30) %>%
       ggplot(aes(x = x_coord, y = mean_test_condition, fill = target)) +
       geom_point(aes(shape = perc_miss_ctrl_cut), size = 3)+
       scale_fill_brewer(palette = "OrRd", direction = -1) +
       scale_shape_manual(values = c(21, 22, 24, 23, 25)) +
       ggrepel::geom_text_repel(aes(label = name), min.segment.length = 0, max.overlaps = 10) +
-      facet_grid(perc_low_ctrl_cut ~ perc_meas_igan_cut, scales = "free") +
+      facet_grid(perc_low_ctrl_cut ~ perc_meas_test_cut, scales = "free") +
       labs(fill = paste0("Percent missing in ", ctrl_condition), y = paste0("Mean(Intensity) in ", test_condition), x = "") +
       theme_proteoSE() +
       theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())

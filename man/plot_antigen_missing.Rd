@@ -6,8 +6,8 @@
 \usage{
 plot_antigen_missing(
   se,
-  test_condition = "lcm_igan",
-  ctrl_condition = "lcm_ctrl",
+  test_condition,
+  ctrl_condition,
   quantile = 0.1,
   perc_low_ctrl = 80,
   targets = data.frame(name = character(0), target = character(0))
@@ -16,9 +16,9 @@ plot_antigen_missing(
 \arguments{
 \item{se}{A \code{SummarizedExperiment} object containing the data to be analyzed.}
 
-\item{test_condition}{A string specifying the test condition to analyze. Defaults to \code{"lcm_igan"}.}
+\item{test_condition}{A string naming the test condition to analyze.}
 
-\item{ctrl_condition}{A string specifying the control condition to compare against. Defaults to \code{"lcm_ctrl"}.}
+\item{ctrl_condition}{A string naming the control condition to compare against.}
 
 \item{quantile}{A numeric value indicating the quantile cutoff for low intensity in the control condition. Defaults to \code{0.1}.}
 
