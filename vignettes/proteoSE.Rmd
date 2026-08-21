@@ -188,6 +188,43 @@ The input file might contain a lot of additional information that is not of inte
 minimal_data <- proteoSE::make_mini(isee_object)
 ```
 
+## Recording the analysis
+
+Everything above is a chain of function calls, and the object at the end
+remembers the *data* but not the calls. A pipeline records the calls instead of
+running them, so the analysis can be inspected, saved alongside the results,
+replayed, and turned into a first draft of a methods paragraph.
+
+```{r pipeline-build}
+pipe <- proteoSE::proteoSE_pipeline(se) |>
+  proteoSE::add_step("filter_perseus", perc_na = 0.33, filter_mode = "each_group") |>
+  proteoSE::add_step("impute_perseus") |>
+  proteoSE::add_step("test_diff", type = "manual", test = "griesser_heat_vs_no_glom_heat") |>
+  proteoSE::add_step("add_rejections", alpha = 0.05, lfc = 1)
+
+pipe
+```
+
+Nothing has run yet. `run_pipeline()` folds the steps over the input object,
+and reproduces the `se_diff_spec` built by hand above:
+
+```{r pipeline-run}
+pipe <- proteoSE::run_pipeline(pipe)
+
+replayed <- proteoSE::pipeline_result(pipe)
+all.equal(
+  SummarizedExperiment::rowData(replayed)$griesser_heat_vs_no_glom_heat_diff,
+  SummarizedExperiment::rowData(se_diff_spec)$griesser_heat_vs_no_glom_heat_diff
+)
+```
+
+`write_methods()` turns the same recipe into prose. Read it before it goes into
+a manuscript -- it is a template fill, not a co-author.
+
+```{r pipeline-methods}
+proteoSE::write_methods(pipe)
+```
+
 ## Save results
 SummarizedExperiments can be saved like any other R object and read back in via *load()*. Make sure to do this at the end of your analysis. 
 ```{r save-results}
