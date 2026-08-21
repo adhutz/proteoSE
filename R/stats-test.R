@@ -107,6 +107,10 @@ test_diff_limma <- function (se, design_formula = formula(~0 + condition), advan
   fit <- lmFit(raw, design = design)
   
   made_contrasts <- makeContrasts(contrasts = cntrst, levels = design)
+  # limma <= 3.64 names these columns after the contrast string, >= 3.68 after
+  # names(contrasts). Everything below indexes by the string, so fix it here
+  # rather than depending on the version.
+  colnames(made_contrasts) <- cntrst
   
   contrast_fit <- contrasts.fit(fit, made_contrasts)
   
