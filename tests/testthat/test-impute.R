@@ -24,3 +24,13 @@ test_that("impute_seeded passes extra arguments through to impute_fun", {
   add_const <- function(x, k = 0) x + k
   expect_equal(impute_seeded(rep(0, 3), add_const, k = 5), rep(5, 3))
 })
+
+# `fun` is a match.arg()-style choice vector that was never match.arg()ed, so
+# the default call died on `if (fun == "mixed")` with "condition has length > 1".
+test_that("impute_DEP2() runs on its own default method", {
+  se <- make_test_se()
+  SummarizedExperiment::assay(se)[c(1, 5, 9)] <- NA
+
+  expect_true("imputed_DEP2" %in%
+                SummarizedExperiment::assayNames(impute_DEP2(se)))
+})

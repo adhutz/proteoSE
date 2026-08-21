@@ -45,7 +45,9 @@ test_diff_long <- function(se){
 #'
 #' @param se SummarizedExperiment with groups as condition column of colData
 #' @param design_formula formula object specifying the design of the linear model. Best left unchanged
-#' @param advanced_contrast character vector specifying the contrasts to be tested. e.g. c("condA_vs_condB" = "condA - condB", "condB_vs_sctrl" = "condB - (condA + condC)/2")
+#' @param advanced_contrast character vector specifying the contrasts to be tested. e.g. c("condA_vs_condB" = "condA - condB", "condB_vs_sctrl" = "condB - (condA + condC)/2").
+#'   Unnamed elements are named by replacing \code{" - "} with \code{"_vs_"},
+#'   so \code{"condA - condB"} alone gives \code{condA_vs_condB_diff} columns.
 #' @param fdr.type character string specifying the method to use for multiple testing correction. Default is "Strimmer's qvalue(t)".
 #'
 #' @return SummarizedExperiment with the results of the test added to the rowData
@@ -67,6 +69,7 @@ test_diff_limma <- function (se, design_formula = formula(~0 + condition), advan
                                     "BH", "Storey's qvalue")) 
 {
   .assert_se(se, require_coldata = all.vars(design_formula))
+  fdr.type <- match.arg(fdr.type)
 
   col_data <- colData(se)
   raw <- assay(se)
@@ -84,9 +87,22 @@ test_diff_limma <- function (se, design_formula = formula(~0 + condition), advan
   conditions <- as.character(unique(condition))
   
   cntrst = advanced_contrast
-  
-  message("Tested contrasts: ", paste(gsub(" - ", "_vs_", cntrst), 
-                                      collapse = ", "))
+
+  if (is.null(cntrst)) {
+    stop("test_diff_limma() needs at least one contrast. Pass e.g. ",
+         "advanced_contrast = \"", conditions[[1]], " - ",
+         conditions[[min(2, length(conditions))]], "\". Conditions in this ",
+         "object: ", paste(conditions, collapse = ", "), ".", call. = FALSE)
+  }
+
+  # An unnamed contrast gets the package's <a>_vs_<b> convention, which is what
+  # every downstream function (validate_se(), plot_volcano(), ...) looks for.
+  nm <- names(cntrst)
+  if (is.null(nm)) nm <- rep("", length(cntrst))
+  nm[!nzchar(nm)] <- gsub(" - ", "_vs_", cntrst[!nzchar(nm)])
+  names(cntrst) <- nm
+
+  .msg("Tested contrasts: {paste(names(cntrst), collapse = ', ')}")
   
   fit <- lmFit(raw, design = design)
   
@@ -136,7 +152,7 @@ test_diff_limma <- function (se, design_formula = formula(~0 + condition), advan
     res <- tibble::rownames_to_column(res)
     return(res)
   }
-  message(fdr.type)
+  .msg("Multiple-testing correction: {fdr.type}")
   limma_res <- purrr::map_df(cntrst, retrieve_fun, fdr.type = fdr.type)
   
   limma_res$comparison = names(cntrst)[match(limma_res$comparison, 

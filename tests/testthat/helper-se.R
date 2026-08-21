@@ -29,6 +29,7 @@ make_test_se <- function(n_features = 10, conditions = c("ctrl", "treat"),
     name        = rownames(mat),
     ID          = rownames(mat)
   )
+  colnames(mat) <- col_data$sample
   SummarizedExperiment::SummarizedExperiment(
     assays  = list(intensity = mat),
     colData = col_data,

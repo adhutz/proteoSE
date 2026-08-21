@@ -107,6 +107,7 @@ impute_perseus = function(se, width = 0.3, downshift = 1.8, per_col=T) {
 impute_DEP2 <- function(se, fun = c("bpca", "knn", "QRILC", "MLE", "MinDet", "MinProb",
                                "man", "min", "zero", "mixed", "nbavg"), ...){
   .assert_se(se)
+  fun <- match.arg(fun)
 
   assays(se, withDimnames = FALSE)$imputed <- assay(se) %>% as.data.frame() %>% dplyr::mutate_all(~ ifelse(is.na(.x), 1,0)) %>% as.matrix()
   
