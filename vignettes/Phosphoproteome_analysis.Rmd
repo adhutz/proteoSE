@@ -40,7 +40,9 @@ Phosphosite multiplicity refers to the number of phosphates attached to a single
 
 ```{r}
 library(dplyr)
+library(ggplot2)
 library(proteoSE)
+library(SummarizedExperiment)
 
 se <- proteoSE::phos_read_in_int(
   file = system.file("extdata", "example_2_Phospho_STY_Sites.txt", package = "proteoSE"),
@@ -53,9 +55,7 @@ se <- proteoSE::phos_read_in_int(
 
 ```{r}
 
-tab <- se %>% colData() %>% gridExtra::tableGrob()
-
-se %>% colData() %>% as.data.frame() %>% kableExtra::kable()  %>% kableExtra::kable_styling(bootstrap_options = c("striped", "hover"))
+se %>% colData() %>% as.data.frame() %>% knitr::kable()
 
 ```
 
@@ -67,19 +67,19 @@ We filter phosphosites with low localization probability to increase the confide
 se <- se[rowData(se)$localization_prob > 0.75]
 
 rd <- se %>% 
-  to_long("intensity_raw") 
+  se_to_long("intensity_raw") 
 
 p_prob <- rd %>% ggplot(aes(x = 1:nrow(.), y = sort(localization_prob)))+
   geom_line() +
   labs(y = "localization probability", x = "rank") +
-  my_theme()
+  theme_proteoSE()
 
 p_prob
 
 p_mult <- rd %>% ggplot(aes(x = multiplicity, y = value, color = sample))+
   geom_boxplot() +
   labs(y = "log(Intensity)")+
-  my_theme()
+  theme_proteoSE()
 
 p_mult
 
@@ -87,7 +87,7 @@ p_n <- rd %>% filter(!is.na(value)) %>% ggplot(aes(x = condition, color = replic
   geom_point(stat = "count", position = "dodge")+
   labs(title = "Multiplicity")+
   facet_wrap(.~multiplicity, nrow = 1, scales = "free_y")+
-  my_theme()
+  theme_proteoSE()
 
 p_n
 
@@ -97,13 +97,15 @@ p_n
 In proteomics, missing values should be handled by retaining entries with only a few missing values to avoid significant data loss and preserve statistical power. These entries can still provide valuable information for analysis. The remaining missing values can be addressed using appropriate statistical techniques, such as imputation, to estimate the missing values based on observed data patterns, ensuring a comprehensive and reliable analysis of the proteomic dataset.
 
 ```{r}
-se_filt <- DEP::filter_missval(se, 2)
+# 4 replicates per condition, so perc_na = 0.5 tolerates 2 missing values in
+# every group -- the same rule as the DEP::filter_missval(se, 2) this replaces.
+se_filt <- proteoSE::filter_perseus(se, perc_na = 0.5, filter_mode = "each_group")
 
 # Percentage of missing values
 p_miss <- data.frame("x" = colnames(assay(se)), "y" = 100 * colSums(is.na(assay(se)))/(colSums(is.na(assay(se))) + colSums(!is.na(assay(se))))) %>% ggplot(aes(x = x, y = y)) +
   geom_bar(stat = "identity") +
   labs(y = "Missing values [%]", title = "Prior filtering missing values")+
-  my_theme()
+  theme_proteoSE()
 
 p_miss
 
@@ -111,7 +113,7 @@ p_miss
 p_miss2 <- data.frame("x" = colnames(assay(se_filt)), "y" = 100 * colSums(is.na(assay(se_filt)))/(colSums(is.na(assay(se_filt))) + colSums(!is.na(assay(se_filt))))) %>% ggplot(aes(x = x, y = y)) +
   geom_bar(stat = "identity") +
   labs(y = "Missing values [%]",  title = "After filtering missing values")+
-  my_theme()
+  theme_proteoSE()
 
 p_miss2
 ```
@@ -124,13 +126,13 @@ Variance normalization aims to equalize the variability across different protein
 On the other hand, median centering involves subtracting the median value of each feature (protein or peptide) from its respective data points. This step helps to remove systematic biases and shifts in the data. Median centering makes the data symmetric around zero, allowing for better comparison and interpretation of relative differences between samples.
 ```{r}
 # Variance normalization
-se_norm_var <- se_filt %>% DEP::normalize_vsn()
+se_norm_var <- se_filt %>% DEP2::normalize_vsn()
 
 # Median normalization
 se_norm <- se_norm_var
 assay(se_norm) <- scale(assay(se_norm), center = TRUE)
 
-p_norm <- DEP::plot_normalization(se_filt, se_norm_var, se_norm) 
+p_norm <- DEP2::plot_normalization(se_filt, se_norm_var, se_norm) 
 
 p_norm
 ```
@@ -141,9 +143,9 @@ By estimating missing values based on observed data patterns, imputation takes i
 In the context of imputing missing values in proteomics, drawing from a left-shifted Gaussian distribution is a common approach because it reflects the underlying assumption that missing values are likely to be lower than the observed values. 
 ```{r}
 # Impute with "perseus" method
-se_imp_perseus <- se_norm %>% proteoSE::impute_DEP(fun = "man")
+se_imp_perseus <- se_norm %>% proteoSE::impute_DEP2(fun = "man")
 
-p_imp <- DEP::plot_imputation(se_norm, se_imp_perseus)
+p_imp <- DEP2::plot_imputation(se_norm, se_imp_perseus)
 
 p_imp
 
@@ -159,26 +161,26 @@ cols <- !grepl("score", colnames(rowData(se_imp_perseus)))
 rowData(se_imp_perseus) <- rowData(se_imp_perseus)[, cols]
 
 # Statistical testing via DEP package
-se_diff <- DEP::test_diff(se_imp_perseus, 
+se_diff <- DEP2::test_diff(se_imp_perseus, 
                           type = "manual", 
                           test = c("gfp_vs_g0", "g2_vs_g0")) %>% 
-  add_sign()
+  add_significance()
 
 # Get test results in long format
-se_diff_test <- long_test(se_diff)
+se_diff_test <- test_diff_long(se_diff)
 
 
 # Bar plot, n(significant) vs. multiplicity
 p_multiplicity <- se_diff_test %>% filter(significant == TRUE) %>% ggplot(aes(x = multiplicity, fill = contrast))+
   geom_bar(stat = "count", position = "dodge")+
-  my_theme()
+  theme_proteoSE()
 
 p_multiplicity
 
 # Bar plot, n(significant) vs. aa
 p_aa <- se_diff_test %>% filter(significant == TRUE) %>% ggplot(aes(x = amino_acid, fill = contrast))+
   geom_bar(stat = "count", position = "dodge")+
-  my_theme()
+  theme_proteoSE()
 
 p_aa
 
@@ -190,15 +192,15 @@ cols_occupancy <- colnames(se_diff_test)[grepl("occupancy_", colnames(se_diff_te
 
 p_occ <- se_diff_test %>% filter(significant == TRUE) %>% tidyr::pivot_longer(cols_occupancy, names_to = "set", values_to  ="occupancy") %>% ggplot(aes(x = set, y = occupancy, color = gsub("occupancy_(.*)_r[0-9]*", "\\1", set)))+
   labs(color = "Condition") +
-  ggbeeswarm::geom_beeswarm() +
-  my_theme()
+  geom_jitter(width = 0.2) +
+  theme_proteoSE()
 
 p_occ
 
 
 # volcanos with labels
-v1 <- proteoSE:::se_volcano(se_diff, contrast = "gfp_vs_g0", id_col = "name")
-v2 <- proteoSE:::se_volcano(se_diff, contrast = "g2_vs_g0", id_col = "name")
+v1 <- proteoSE::plot_volcano(se_diff, contrast = "gfp_vs_g0", id_col = "name")
+v2 <- proteoSE::plot_volcano(se_diff, contrast = "g2_vs_g0", id_col = "name")
 
 v1
 v2
@@ -209,16 +211,19 @@ v2
 volcanos <- se_diff_test %>% ggplot(aes(x = diff, y = -log2(p.val), color = significant)) +
   geom_point() +
   facet_wrap(.~contrast) +
-  my_theme()
+  theme_proteoSE()
 
 volcanos
 
-# PCA of significant sites (change n accordingly)
-p_pca <- se_diff[rowData(se_diff)$significant == TRUE,] %>% DEP::plot_pca(n = 7)
+# PCA of significant sites. `n` is the number of most-variable features to use,
+# so it cannot exceed however many came out significant.
+se_sign <- se_diff[rowData(se_diff)$significant == TRUE, ]
+p_pca <- DEP2::plot_pca(se_sign, n = min(7, nrow(se_sign)))
 p_pca
 
 # Heatmap
-p_heatmap <- clustered_heatmap(se_diff, k = 3)
+# k is a number of clusters, so it cannot exceed the number of significant sites
+p_heatmap <- plot_heatmap_clustered(se_diff, k = min(3, nrow(se_sign)))
 
 ```
 
@@ -247,7 +252,7 @@ dev.off()
 
 apol1 <- rownames(assay(se_filt)) %>% grep("APOL1", ., value = TRUE)
 
-p_apol1 <- lapply(apol1, plot_single, dep = se_diff, type = "centered")
+p_apol1 <- lapply(apol1, function(x) DEP2::plot_single(se_diff, x, type = "centered"))
 
 p_apol1
 
@@ -315,7 +320,7 @@ res_sign_long <- gct_to_long(file = paste0(dir, "/20230421_sign_intensity-combin
 res_sign_long %>% filter(fdr.pvalue < 0.1) %>% ggplot(aes(x = id.y, y = id.x, size = value, color = fdr.pvalue))+
   geom_point() +
   scale_color_gradient2(low = "blue", high = "firebrick", mid = "white") +
-  my_theme()
+  theme_proteoSE()
 
 ```
 
@@ -345,7 +350,7 @@ res_long <- gct_to_long(file = paste0(dir, "/20230421_intensity-combined.gct"))
 res_long %>% filter(fdr.pvalue < 0.05) %>% ggplot(aes(x = id.y, y = id.x, size = value, color = fdr.pvalue))+
   geom_point() +
   scale_color_gradient2(low = "blue", high = "firebrick", mid = "white") +
-  my_theme()
+  theme_proteoSE()
 
 ```
 
@@ -363,21 +368,24 @@ ksea_input_g2_vs_g0 <- prep_ksea(se = se_diff, contrast = "g2_vs_g0")
 ```
 
 ### Get KS_table
-```{r}
+`KSEAapp` is not on CRAN (`remotes::install_github("casecpb/KSEAapp")`), so
+the chunks in this section are shown but not run.
+
+```{r, eval = FALSE}
 library(KSEAapp)
 KSData.dataset_gfp <- KSEA.KS_table(KSData,  ksea_input_gfp_vs_g0, NetworKIN=TRUE, NetworKIN.cutoff=5)
 KSData.dataset_g2 <- KSEA.KS_table(KSData,  ksea_input_g2_vs_g0, NetworKIN=TRUE, NetworKIN.cutoff=5)
 ```
 
 ### Get scores
-```{r}
+```{r, eval = FALSE}
 Scores_gfp <- KSEA.Scores(KSData, ksea_input_gfp_vs_g0, NetworKIN=TRUE, NetworKIN.cutoff=5)
 Scores_g2 <- KSEA.Scores(KSData, ksea_input_g2_vs_g0, NetworKIN=TRUE, NetworKIN.cutoff=5)
 ```
 
 ### Barplot
 The Barplot is saved as a tiff in your working directory. To make things easier you can copy the file via the "file.copy" function.
-```{r}
+```{r, eval = FALSE}
 KSEA.Barplot(KSData, ksea_input_gfp_vs_g0, NetworKIN=TRUE, NetworKIN.cutoff=5, m.cutoff=5, p.cutoff=0.01, export = FALSE)
 
 KSEA.Barplot(KSData, ksea_input_g2_vs_g0, NetworKIN=TRUE, NetworKIN.cutoff=5, m.cutoff=5, p.cutoff=0.01, export=FALSE)

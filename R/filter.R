@@ -26,7 +26,7 @@ filter_perseus<-function(se, perc_na = 0.33, filter_mode = "each_group"){
 
       # 1. Step: create long table with groups
 
-      data_long <- DEP2::get_df_long(se)
+      data_long <- .se_long(se)
 
       # 2. Step: Apply filtering
 

@@ -29,7 +29,7 @@ impute_perseus = function(se, width = 0.3, downshift = 1.8, per_col=T) {
 
   # 1. transform to long and set lfq_imputed = TRUE for all missing values
   df <- se %>%
-    get_df_long() %>%
+    .se_long() %>%
     select(sample, condition, intensity, name) %>%
     ungroup()%>%
     mutate(lfq_imputed = ifelse(is.na(intensity), TRUE, FALSE))

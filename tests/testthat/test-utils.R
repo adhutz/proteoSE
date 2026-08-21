@@ -51,3 +51,15 @@ test_that("compare_dataframes_full detects a differing column", {
   expect_false(res$all_match[res$column == "val"])
   expect_equal(res$matching_rows[res$column == "val"], 2)
 })
+
+test_that(".se_long() keeps the assay column named intensity", {
+  # DEP2::get_df_long() suffixes both to intensity.x / intensity.y when rowData
+  # already has an `intensity` column, which every MaxQuant phospho table does.
+  se <- make_test_se(n_features = 4)
+  SummarizedExperiment::rowData(se)$intensity <- seq_len(nrow(se))
+
+  long <- .se_long(se)
+  expect_true("intensity" %in% colnames(long))
+  expect_false(any(grepl("intensity.", colnames(long), fixed = TRUE)))
+  expect_type(long$intensity, "double")
+})
