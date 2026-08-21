@@ -4,12 +4,12 @@
 \alias{se_to_long}
 \title{Convert a SummarizedExperiment object to a long format data frame}
 \usage{
-se_to_long(se, assays_ = c(""))
+se_to_long(se, assays_ = NULL)
 }
 \arguments{
 \item{se}{A SummarizedExperiment object.}
 
-\item{assays_}{A character vector of assay names to include in the output data frame. Default is an empty character vector, which selects all assays.}
+\item{assays_}{A character vector of assay names to include in the output data frame. Default is \code{NULL}, which selects all assays.}
 }
 \value{
 A data frame in long format with assay values, rowData, and colData combined.

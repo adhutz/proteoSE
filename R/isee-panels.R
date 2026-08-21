@@ -6,9 +6,16 @@
 # provides the S4 machinery. Both are imported via roxygen below (no code runs
 # at package load).
 
+# Both annotation DBs are reached by *string* here (GOTable's `Organism` slot,
+# the getExportedValue() in .createObservers(), the require() emitted into the
+# iSEE code chunk), so nothing calls `org.Mm.eg.db::`. The importFrom below is
+# what guarantees the package is installed for the GOTable default; without it
+# the default panel silently returns no gene annotation.
+
 #' @import methods
 #' @import iSEE
 #' @importFrom S4Vectors setValidity2
+#' @importFrom org.Mm.eg.db org.Mm.eg.db
 NULL
 
 setClass("GeneAnnoTable", contains="RowDataTable",
