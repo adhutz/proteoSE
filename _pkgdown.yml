@@ -115,6 +115,15 @@ reference:
   - flatten_plot_points
   - save_flattened_plot
 
+- title: Reproducible pipelines
+  desc: Record an analysis as a recipe, replay it, and draft its methods paragraph.
+  contents:
+  - proteoSE_pipeline
+  - add_step
+  - run_pipeline
+  - pipeline_result
+  - write_methods
+
 - title: Reports and export
   contents:
   - qc_report
