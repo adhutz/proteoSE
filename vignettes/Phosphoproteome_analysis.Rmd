@@ -411,10 +411,6 @@ KSEA.Heatmap(score.list=list(Scores_b, Scores_c),
 file.copy("KSEA.Merged.Heatmap.png", paste0(dir, "/ksea_heatmap.png"), overwrite = TRUE)
 ```
 
-```{r}
-knitr::include_graphics("../inst/extdata/KSEA.Merged.Heatmap.png")
-```
-
 # Plot Sequence Logos
 Sequence logos can be plotted via the *ggseqlogo* package. The input is a named list of the sequences as strings. All strings need to have the same length, so one needs to apply the center_substring first.
 

@@ -22,6 +22,9 @@ data-raw/test_run.log
 # ... except the generator for the shipped synthetic example, which has to be
 # reproducible. .Rbuildignore keeps data-raw/ out of the tarball either way.
 !/data-raw/make_phospho_example.R
+!/data-raw/make_proteome_example.R
+!/data-raw/make_example_project.R
+!/data-raw/make_worked_example_figures.R
 
 # Working notes, superseded by docs/ and the vignette
 /AUDIT.md
