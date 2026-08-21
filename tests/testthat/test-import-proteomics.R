@@ -1,6 +1,7 @@
 # Characterization tests for the protein-level importers.
 #
-# These pin the CURRENT output of each importer on the real example data so the
+# These pin the CURRENT output of each importer on the bundled synthetic example
+# data (data-raw/make_proteome_example.R) so the
 # Phase 5 unification (folding se_read_in / spectronaut_read_in / fragpipe_read_in
 # into read_proteomics()) can be proven behaviour-preserving. They are golden
 # tests: if the refactor changes a number here, that is a regression to explain,
@@ -27,15 +28,14 @@ test_that("se_read_in (MaxQuant) reproduces the reference SummarizedExperiment",
   expect_equal(nrow(cd), 30L)
   expect_setequal(
     unique(cd$condition),
-    c("griesser_heat", "griesser_no_heat", "no_glom_heat",
-      "scarred_glom_heat", "sds_heat", "sds_no_heat")
+    c("cond_a", "cond_b", "cond_c", "cond_d", "cond_e", "cond_f")
   )
 
   expect_equal(head(rownames(se), 5),
-               c("IGLV3-9", "IGKV2D-28", "IGKV3D-11", "IGHV3-74", "P0DPI2"))
+               c("MIR1263", "SUN5", "MTND5P13", "DEPTOR", "MIR4731"))
 
   m <- SummarizedExperiment::assay(se, "lfq_raw")
   expect_equal(dim(m), c(1808L, 30L))
-  expect_equal(sum(is.na(m)), 33642L)
-  expect_equal(sum(m[, 1], na.rm = TRUE), 18637.33, tolerance = 1e-2)
+  expect_equal(sum(is.na(m)), 6603L)
+  expect_equal(sum(m[, 1], na.rm = TRUE), 42583.81, tolerance = 1e-2)
 })
