@@ -294,7 +294,8 @@ write_methods <- function(pipe, file = NULL) {
     a$filter_mode, ")."),
   impute_perseus = function(a) paste0(
     "Missing values were imputed from a downshifted normal distribution ",
-    "(width ", a$width, " SD, downshift ", a$shift, " SD), as implemented in ",
+    "(width ", a$width, " SD, downshift ", a$downshift, " SD), as ",
+    "implemented in ",
     "Perseus."),
   impute_DEP2 = function(a) paste0(
     "Missing values were imputed using the ", a$fun, " method."),

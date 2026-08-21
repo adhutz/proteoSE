@@ -104,6 +104,16 @@ test_that("write_methods() reports every step and its parameters", {
   expect_match(txt, R.version.string, fixed = TRUE)
 })
 
+# A template that names an argument the function does not have silently
+# paste0()s a NULL, i.e. nothing -- "downshift  SD". Catch the gap, not the
+# prose.
+test_that("every methods template fills in all its parameters", {
+  for (fn in names(.methods_templates)) {
+    sentence <- .methods_templates[[fn]](.with_defaults(fn, list()))
+    expect_no_match(sentence, "  |NULL|NA\b", label = fn)
+  }
+})
+
 test_that("write_methods() writes to a file when asked", {
   f <- tempfile(fileext = ".txt")
   on.exit(unlink(f))
