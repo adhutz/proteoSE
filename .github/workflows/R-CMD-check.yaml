@@ -40,10 +40,10 @@ jobs:
 
       - uses: r-lib/actions/check-r-package@v2
         with:
-          # Examples reach the network/real data and are wrapped in \dontrun;
-          # vignettes need the full Bioconductor stack to build. Both are
-          # exercised separately, so skip them here to keep CI deterministic.
-          args: 'c("--no-manual", "--no-examples", "--no-vignettes")'
-          build_args: 'c("--no-build-vignettes")'
+          # Examples reach the network/real data and are wrapped in \dontrun,
+          # so they stay off. Vignettes are built and run: they execute more of
+          # the package than the test suite does, and every bug found in
+          # session 6 was one only a vignette render reached.
+          args: 'c("--no-manual", "--no-examples")'
           error-on: '"error"'
           upload-snapshots: true

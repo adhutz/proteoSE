@@ -274,6 +274,10 @@ test_diff_phosR <- function(ppe, contrast = c("treatment_vs_control"), test_all 
   
   # Create contrast matrix
   contrast.matrix <- makeContrasts(contrasts = contrast_, levels=design)
+  # topTable(coef = ) below indexes by the contrast string, but limma >= 3.68
+  # names these columns after names(contrast_) -- which unlist() above sets to
+  # "contrast_1", "contrast_2", ... See test_diff_limma() for the same fix.
+  colnames(contrast.matrix) <- contrast_
   
   # fit model
   fit2 <- contrasts.fit(fit, contrast.matrix)

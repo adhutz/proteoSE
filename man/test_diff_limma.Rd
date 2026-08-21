@@ -16,7 +16,9 @@ test_diff_limma(
 
 \item{design_formula}{formula object specifying the design of the linear model. Best left unchanged}
 
-\item{advanced_contrast}{character vector specifying the contrasts to be tested. e.g. c("condA_vs_condB" = "condA - condB", "condB_vs_sctrl" = "condB - (condA + condC)/2")}
+\item{advanced_contrast}{character vector specifying the contrasts to be tested. e.g. c("condA_vs_condB" = "condA - condB", "condB_vs_sctrl" = "condB - (condA + condC)/2").
+Unnamed elements are named by replacing \code{" - "} with \code{"_vs_"},
+so \code{"condA - condB"} alone gives \code{condA_vs_condB_diff} columns.}
 
 \item{fdr.type}{character string specifying the method to use for multiple testing correction. Default is "Strimmer's qvalue(t)".}
 }
