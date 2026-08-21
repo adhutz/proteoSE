@@ -72,6 +72,16 @@ enrich_go_se <- function(se, col_names =c(), simplify = TRUE, ont="all", keyType
     if (length(l) == 0) {
       cli::cli_abort("No usable gene symbols in {.field {comp_}}.")
     }
+
+    # Two protein groups can carry the same gene symbol -- isoform groups and
+    # groups split on shared peptides both do -- and gseGO() rejects duplicate
+    # names as hard as it rejects NAs. Rank the strongest statistic per symbol.
+    if (anyDuplicated(names(l))) {
+      l <- l[order(abs(l), decreasing = TRUE)]
+      dup <- duplicated(names(l))
+      .msg("Collapsed {sum(dup)} duplicate gene symbol{?s} to the strongest statistic")
+      l <- l[!dup]
+    }
     l<-sort(l, decreasing=TRUE)
 
     #Calculate GO-term enrichment
