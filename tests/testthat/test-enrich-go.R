@@ -30,3 +30,17 @@ test_that(".parse_ratio turns clusterProfiler k/n strings into numbers", {
   expect_equal(.parse_ratio(character(0)), numeric(0))
   expect_true(is.na(.parse_ratio(NA_character_)))
 })
+
+test_that("enrich_go_se() says so when nothing has a gene symbol", {
+  # gseGO() aborts with "NAs in names(stats) are not allowed" if any feature
+  # lacks a symbol -- real MaxQuant output always has a few. enrich_go_se()
+  # drops those; when that leaves nothing, it must say why.
+  se <- make_test_se(n_features = 6)
+  SummarizedExperiment::rowData(se)$gene_names <- NA_character_
+  SummarizedExperiment::rowData(se)$treat_vs_ctrl_diff <- seq_len(nrow(se)) / 10
+
+  expect_error(
+    enrich_go_se(se, col_names = "treat_vs_ctrl_diff"),
+    "No usable gene symbols"
+  )
+})

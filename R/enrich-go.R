@@ -58,6 +58,20 @@ enrich_go_se <- function(se, col_names =c(), simplify = TRUE, ont="all", keyType
 
     l <- tab_[,comp_]
     names(l)<-tab_$gene_names
+
+    # gseGO() aborts with "NAs in names(stats) are not allowed" if any
+    # feature has no gene symbol, which real search-engine output always has
+    # (6 of the 1808 rows in the bundled example_1 file). Drop those, and the
+    # unrankable NA statistics with them, rather than failing on the whole
+    # contrast.
+    keep <- !is.na(names(l)) & names(l) != "" & !is.na(l)
+    if (!all(keep)) {
+      .msg("Dropped {sum(!keep)} feature{?s} with no gene symbol or no statistic")
+      l <- l[keep]
+    }
+    if (length(l) == 0) {
+      cli::cli_abort("No usable gene symbols in {.field {comp_}}.")
+    }
     l<-sort(l, decreasing=TRUE)
 
     #Calculate GO-term enrichment
