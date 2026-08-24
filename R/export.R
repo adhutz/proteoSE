@@ -17,7 +17,9 @@
 #' @import dplyr
 #' @export
 write_phos <- function(se, file = ""){
-  .assert_se(se)
+  .assert_se(se, require_rowdata = c("name", "gene_names", "protein", "protein_names",
+                                     "amino_acid", "position", "multiplicity",
+                                     "sequence_window"))
 
   exp <- se %>% 
     get_df_wide() %>%
@@ -58,7 +60,9 @@ write_phos <- function(se, file = ""){
 #' @import dplyr
 #' @export
 write_prot <- function(se, file = ""){
-  .assert_se(se)
+  .assert_se(se, require_rowdata = c("name", "gene_names", "protein_ids",
+                                     "protein_descriptions", "orig_prot_ids",
+                                     "orig_gene_names"))
 
   exp <- se %>% 
     get_df_wide() %>%

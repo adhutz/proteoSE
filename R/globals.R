@@ -90,7 +90,6 @@ utils::globalVariables(c(
   "max_prob_across_exp",
   "mean_intensity",
   "mean_test_condition",
-  "min.segment.length",
   "modification_title",
   "molecular_weight",
   "multiplicity",

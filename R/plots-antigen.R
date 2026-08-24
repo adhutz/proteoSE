@@ -18,7 +18,9 @@
 #' @param min_intensity A numeric value specifying the minimum intensity for data points to be considered. Defaults to `10`. If scaled is set to TRUE, this needs to be changed to a lower value. 
 #' @param max.overlaps A numeric value indicating the maximum number of label overlaps allowed in the plot. Defaults to `40`.
 #' @param targets A data frame containing `name` and `target` columns, specifying target proteins or features of interest. Defaults to an empty data frame.
-#' @param min.segment.length Minimum segment length for labels
+#' @param min.segment.length Minimum length of the line segment drawn from a
+#'   label to its point, passed to \code{\link[ggrepel]{geom_text_repel}}.
+#'   Defaults to `0`.
 #'
 #' @return A combined plot displaying individual and overlapping data points for the specified contrast.
 #' @details The function processes the `SummarizedExperiment` data to calculate the mean of control samples and the differences between test samples and control means. It generates individual plots for test samples and an overlap plot for the specified conditions.
@@ -36,7 +38,9 @@
 #' @importFrom tidyr pivot_longer pivot_wider
 #' @importFrom patchwork wrap_plots plot_annotation plot_layout
 #' @export
-plot_antigen <- function(se, contrast, additional_sets = "none", scale = FALSE, min_diff = 1, min_intensity = 10, max.overlaps = 40, targets = data.frame(name = character(0), target = character(0), min.segment.length = 0)){
+plot_antigen <- function(se, contrast, additional_sets = "none", scale = FALSE, min_diff = 1, min_intensity = 10, max.overlaps = 40, min.segment.length = 0, targets = data.frame(name = character(0), target = character(0))){
+
+  .assert_se(se, require_coldata = "condition", require_contrast = contrast)
   
   ctrl_condition <- gsub(".*_vs_(.*)$","\\1", contrast)
   ctrl_mean <- paste0(ctrl_condition, "_mean_intensity")
@@ -48,11 +52,10 @@ plot_antigen <- function(se, contrast, additional_sets = "none", scale = FALSE, 
     message(paste0("No mean for ctrl condition found. Mean for\"", ctrl_condition, "\" was calculated via proteoSE::add_stats(). This value is not retained in the se object."))
   }
   
-  if(additional_sets == "all"){
-    additional_sets <- se$condition
-  } else if(additional_sets == "none"){
-    additional_sets <- NULL
-  }
+  # identical(), not ==: additional_sets is documented as a character *vector*,
+  # and `if (c("a", "b") == "all")` is an error, not FALSE.
+  if (identical(additional_sets, "all"))  additional_sets <- se$condition
+  if (identical(additional_sets, "none")) additional_sets <- NULL
   
   sets <- strsplit(contrast, "_vs_") %>% unlist() %>% c(., additional_sets)  %>% unique()
   
@@ -125,6 +128,8 @@ plot_antigen <- function(se, contrast, additional_sets = "none", scale = FALSE, 
 plot_antigen_missing <- function(se, test_condition, ctrl_condition, 
                                  quantile = 0.1, perc_low_ctrl = 80, targets = data.frame(name = character(0), target = character(0))){
   
+  .assert_se(se, require_coldata = c("condition", "label", "replicate"))
+
   df_long <- DEP2::get_df_long(se[, se$condition %in% c(test_condition, ctrl_condition)]) %>% select(name, condition, intensity, label, replicate)
   n_ctrl <- sum(se$condition == ctrl_condition)
   n_test <- sum(se$condition == test_condition)
