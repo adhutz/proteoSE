@@ -121,6 +121,10 @@ prep_ssgsea2 <- function(se, file = ""){
 #' prep_ksea_data <- prep_ksea(se, contrast)
 #' }
 prep_ksea <- function(se, contrast){
+  .assert_se(se,
+             require_rowdata  = c("proteins", "gene_names", "amino_acid", "position"),
+             require_contrast = contrast)
+
   diff_ <- paste0(contrast, "_diff")
   p_ <- paste0(contrast, "_p.val")
   

@@ -38,6 +38,9 @@ isee_mini <- function(se) {
 #' @importFrom dplyr ends_with
 #' @export
 make_mini <- function(se) {
+  .assert_se(se, require_rowdata = c("gene_names", "protein_ids",
+                                    "majority_protein_ids", "protein_names"))
+
   rowData(se) <- rowData(se) %>%
     as.data.frame() %>%
     select(gene_names,

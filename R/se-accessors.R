@@ -229,6 +229,9 @@ se_modify <- function(se, datatype = c("rowData", "colData"), modify_function, .
 #' @export
 
 get_df_wide_append_assay <- function(se, assays = NULL) {
+  .assert_se(se, require_rowdata = c("name", "gene_names", "protein_ids",
+                                     "description", "ID", "protein"))
+
   # If assays is NULL, retrieve all assay names from SummarizedExperiment
   if (is.null(assays)) {
     assays <- names(assays(se))

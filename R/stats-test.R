@@ -18,7 +18,8 @@
 #' # result <- test_diff_long(se)
 #' @export
 test_diff_long <- function(se){
-  
+  .assert_se(se, require_rowdata = "significant")
+
   res <- se %>% 
     get_rowdata() %>% 
     select(-significant) %>% 

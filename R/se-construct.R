@@ -152,6 +152,8 @@ add_randna <- function(se){
 #' }
 #' @export
 add_significance <- function(se, p_thr = 0.05, diff_thr = 1){
+  .assert_se(se, require_rowdata = "site_id_mult")
+
   se_long <- get_rowdata(se) %>% 
   dplyr::select(c(site_id_mult, 
                   ends_with("_diff"), 

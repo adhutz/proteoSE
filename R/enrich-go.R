@@ -160,7 +160,8 @@ enrich_go_se <- function(se, col_names =c(), simplify = TRUE, ont="all", keyType
 #' @importFrom clusterProfiler enrichGO
 #' @export
 phospho_ora <- function(se, contr = "all", OrgDb = "org.Hs.eg.db", pvalueCutoff = 0.4, qvalueCutoff = 0.8, ont = c("BP", "MF", "CC")){
-  
+  .assert_se(se, require_rowdata = c("gene_names", "significant"))
+
   se_diff_test <- se %>% test_diff_long()
   if(!contr == "all"){
     se_diff_test <- se_diff_test %>% filter(contrast %in% contr)
