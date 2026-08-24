@@ -12,8 +12,8 @@ plot_antigen(
   min_diff = 1,
   min_intensity = 10,
   max.overlaps = 40,
-  targets = data.frame(name = character(0), target = character(0), min.segment.length =
-    0)
+  min.segment.length = 0,
+  targets = data.frame(name = character(0), target = character(0))
 )
 }
 \arguments{
@@ -31,9 +31,11 @@ plot_antigen(
 
 \item{max.overlaps}{A numeric value indicating the maximum number of label overlaps allowed in the plot. Defaults to \code{40}.}
 
-\item{targets}{A data frame containing \code{name} and \code{target} columns, specifying target proteins or features of interest. Defaults to an empty data frame.}
+\item{min.segment.length}{Minimum length of the line segment drawn from a
+label to its point, passed to \code{\link[ggrepel]{geom_text_repel}}.
+Defaults to \code{0}.}
 
-\item{min.segment.length}{Minimum segment length for labels}
+\item{targets}{A data frame containing \code{name} and \code{target} columns, specifying target proteins or features of interest. Defaults to an empty data frame.}
 }
 \value{
 A combined plot displaying individual and overlapping data points for the specified contrast.
