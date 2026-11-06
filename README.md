@@ -9,10 +9,6 @@ filtering, missing-value imputation, differential-abundance testing, GO-term and
 enrichment, kinase-substrate and signalome analysis, STRING networks, and publication-ready
 figures. It builds on *DEP2*, *limma*, *PhosR*, *clusterProfiler* and *iSEE* / *iSEEu*.
 
-> **Note:** `proteoSE` was previously released as `sev` and then `sev2`. It installs under a
-> distinct package name, so older installs keep working side by side
-> (`library(sev)` vs `library(proteoSE)`). Renamed exports keep deprecated aliases for one
-> release cycle — e.g. `theme_sev()` still works and points you at `theme_proteoSE()`.
 
 ## Installation
 Open up R and run the following code:
